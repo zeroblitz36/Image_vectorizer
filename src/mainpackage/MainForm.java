@@ -18,9 +18,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Created by GeorgeRoscaneanu on 15.04.2015.
- */
+
 public class MainForm {
 
     private JPanel mainPanel;
@@ -34,13 +32,13 @@ public class MainForm {
 
     File mainImageFile = new File("photo3.bmp");
     //File file2 = new File("C:\\Users\\GeorgeRoscaneanu\\Downloads\\milky-way-galaxy-615.jpg");
-
+    /*
     private float f[][] = new float[][]{
             {-1,-1, 0},
             {-1, 0, 1},
             { 0, 1, 1}
     };
-
+    */
     private float f2[][] = Filters.generateGaussian(3, 1.1f);
     private float f3[][] = Filters.generateGaussian(7,1.1f);
     private float f4[][] = Filters.generateGaussian(11,1.1f);
@@ -53,72 +51,60 @@ public class MainForm {
 
     private Random random = new Random(System.currentTimeMillis());
     public MainForm() {
-        btnLoadPhoto.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            //reset image panels
-                            imagePanel21.setImage(null);
-                            imagePanel22.setImage(null);
-                            imagePanel23.setImage(null);
-                            imagePanel24.setImage(null);
+        btnLoadPhoto.addActionListener(e -> new Thread(() -> {
+            try {
+                //reset image panels
+                imagePanel21.setImage(null);
+                imagePanel22.setImage(null);
+                imagePanel23.setImage(null);
+                imagePanel24.setImage(null);
 
-                            BufferedImage img = ImageIO.read(mainImageFile);
-                            mainBufferedImage = img;
+                BufferedImage img = ImageIO.read(mainImageFile);
+                System.out.printf("Loaded image with size: %d %d\n",img.getWidth(),img.getHeight());
+                mainBufferedImage = img;
 
-                            imagePanel21.setImage(mainBufferedImage);
+                imagePanel21.setImage(mainBufferedImage);
 
-                            polygonVectorizer = new PolygonVectorizer(mainBufferedImage);
-                            polygonVectorizer.initialize();
-                            polygonVectorizer.setDestImagePanel(imagePanel22);
+                if(polygonVectorizer!=null)
+                    polygonVectorizer.cancelLastJob();
+                polygonVectorizer = new PolygonVectorizer(mainBufferedImage);
+                polygonVectorizer.initialize();
+                polygonVectorizer.setDestImagePanel(imagePanel22);
 
-                            triangleVectorizer = new TriangleVectorizer(mainBufferedImage);
-                            triangleVectorizer.initialize();
-                            triangleVectorizer.setDestImagePanel(imagePanel24);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
+                triangleVectorizer = new TriangleVectorizer(mainBufferedImage);
+                triangleVectorizer.initialize();
+                triangleVectorizer.setDestImagePanel(imagePanel24);
+            } catch (IOException err) {
+                err.printStackTrace();
             }
-        });
-        slider1.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                int x = slider1.getValue();
-                if(x!=lastSliderValue){
-                    //System.out.println("Changed value to "+x);
-                    lastSliderValue = x;
+        }).start());
+        slider1.addChangeListener(e -> {
+            int x = slider1.getValue();
+            if(x!=lastSliderValue){
+                //System.out.println("Changed value to "+x);
+                lastSliderValue = x;
 
-                    if(squareVectorizer!=null){
-                        squareVectorizer.setCanceled(true);
-                    }
-
-                    squareVectorizer = new SquareVectorizer(x);
-                    squareVectorizer.start();
-
-                    triangleVectorizer.threshold = x;
-                    triangleVectorizer.startJob();
-
-                    polygonVectorizer.threshold = x;
-                    polygonVectorizer.startJob();
+                if(squareVectorizer!=null){
+                    squareVectorizer.setCanceled(true);
                 }
+
+                squareVectorizer = new SquareVectorizer(x);
+                squareVectorizer.start();
+
+                triangleVectorizer.threshold = x;
+                triangleVectorizer.startJob();
+
+                polygonVectorizer.threshold = x;
+                polygonVectorizer.startJob();
             }
         });
 
-        chooseFileButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final JFileChooser fc = new JFileChooser();
-                fc.setDialogTitle("Choose image file");
-                int returnedValue = fc.showOpenDialog(chooseFileButton);
-                if(returnedValue == JFileChooser.APPROVE_OPTION){
-                    mainImageFile = fc.getSelectedFile();
-                }
+        chooseFileButton.addActionListener(e -> {
+            final JFileChooser fc = new JFileChooser();
+            fc.setDialogTitle("Choose image file");
+            int returnedValue = fc.showOpenDialog(chooseFileButton);
+            if(returnedValue == JFileChooser.APPROVE_OPTION){
+                mainImageFile = fc.getSelectedFile();
             }
         });
     }
@@ -130,6 +116,7 @@ public class MainForm {
         boolean isCanceled = false;
         private int threshold;
         private ArrayList<SquareFragment> fragList = new ArrayList<>();
+        private final Object fragListLock = new Object();
         long startTime,endTime;
         private ExecutorService executorService = Executors.newFixedThreadPool(4);
 
@@ -218,7 +205,7 @@ public class MainForm {
                 }
             if(!fail){
                 s.color = avgColor;
-                synchronized (fragList) {
+                synchronized (fragListLock) {
                     fragList.add(s);
                 }
             }else{
@@ -251,11 +238,8 @@ public class MainForm {
             for(SquareFragment squareFragment : squareFragments){
                 final SquareFragment sf = squareFragment;
                 if(sf.isValid()){
-                    Thread t = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            recFragCheck(sf);
-                        }
+                    Thread t = new Thread(() -> {
+                        recFragCheck(sf);
                     });
                     threads.add(t);
                     t.start();
@@ -295,7 +279,7 @@ public class MainForm {
     public static void main(String[] args) {
         JFrame frame = new JFrame("MainForm");
         frame.setContentPane(new MainForm().mainPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
     }
