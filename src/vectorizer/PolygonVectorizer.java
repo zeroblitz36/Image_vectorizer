@@ -132,7 +132,6 @@ public class PolygonVectorizer {
                     coloredPolygons.add(coloredPolygon);
                     counter++;
 
-                    //System.out.format("Found polygon with color %d starting from %d %d\n",coloredPolygon.color,x0,y0);
                     if(counter%2500==0) {
                         drawFunction();
                         try {
@@ -141,7 +140,6 @@ public class PolygonVectorizer {
                             e.printStackTrace();
                         }
                     }
-
                     //if(!notDebug)
                     //    break;
                 }
@@ -206,7 +204,6 @@ public class PolygonVectorizer {
             ColoredPolygon coloredPolygon = new ColoredPolygon();
             Path2D.Float path = new Path2D.Float();
             LinkedList<Point> list = new LinkedList<>();
-            //LinkedList<Point> insidePoints = new LinkedList<>();
             int startColor = originalImage.getRGB(x,y);
             int rTotal=0,gTotal=0,bTotal=0;
             int count=0;
@@ -221,7 +218,6 @@ public class PolygonVectorizer {
             list.add(new Point(x0,y0-1));
             list.add(new Point(x0,y0+1));
 
-            //list.add(new Point(x,y));
             Point point;
             rTotal += redOrig(x, y);
             gTotal += greenOrig(x, y);
@@ -261,11 +257,6 @@ public class PolygonVectorizer {
                     list.add(new Point(x0+1,y0));
                     list.add(new Point(x0,y0-1));
                     list.add(new Point(x0,y0+1));
-                    /*
-                    list.add(new Point(x0-1,y0-1));
-                    list.add(new Point(x0+1,y0-1));
-                    list.add(new Point(x0+1,y0-1));
-                    list.add(new Point(x0+1,y0+1));*/
                 }
             }
 
@@ -273,66 +264,13 @@ public class PolygonVectorizer {
             gTotal /= count;
             bTotal /= count;
             int averageColor = 0xff000000 | (rTotal<<16) | (gTotal<<8) | bTotal;
-            //System.out.format("Found %d pixels with color %d\n", count, averageColor);
 
-
-            //Attempting cleaning of false walls
-            //Attempt 1
-            /*
-            for(int i=minY;i<=maxY && i<h-1;i++) {
-                int state = 0;
-                int z,zl,zr,zt,zb;
-                for (int j = minX; j <= maxX && j<w-1; j++) {
-                    z = workMatrix[i * w + j];
-                    if(state==0){
-                        if(z==1) {
-                            workMatrix[i * w + j] = 0;
-                        }else if(z==2){
-                            state=1;
-                        }
-                    }else if(state==1){
-                        if(z==2) {
-                            //zl = getWorkPixel(j-1,i);
-                            zr = getWorkPixel(j+1,i);
-                            //zt = getWorkPixel(j,i-1);
-                            //zb = getWorkPixel(j,i+1);
-
-                            //if(zl!=0 && zr!=0 && zt!=0 && zb!=0)
-                            if(zr!=0 &&
-                                    getWorkPixel(j+1,i+1)!=0&&
-                                    getWorkPixel(j,i+1)!=0&&
-                                    getWorkPixel(j-1,i+1)!=0&&
-                                    getWorkPixel(j-1,i)!=0&&
-                                    getWorkPixel(j-1,i-1)!=0&&
-                                    getWorkPixel(j,i-1)!=0&&
-                                    getWorkPixel(j+1,i-1)!=0)
-                                workMatrix[i * w + j] = 1;
-                            else if(zr==0)
-                                state = 0;
-                        }
-                    }
-                }
-            }*/
-
-
-            //Attempt 2
             for(y0=minY;y0<=maxY;y0++)
                 for(x0=minX;x0<=maxX;x0++)
                 {
                     if(getWorkPixel(x0,y0)==2 && !isThereAnyEmptySpaces(x0,y0))
                         workMatrix[y0*w+x0]=1;
                 }
-            /*
-            boolStopBacktrack=false;
-            maxStackOfPoints.clear();
-            maxStackOfPoints.add(new Point(x,y));
-            workStackOfPoints.clear();
-            workX = x;
-            workY = y;
-            backtrackLongestPerimeter(x,y);
-            if(canceled)return coloredPolygon;*/
-
-
             int dir,dir2;
 
             for(y0=minY;y0<=maxY;y0++)
@@ -380,7 +318,6 @@ public class PolygonVectorizer {
                         done = true;
                     }else {
                         point = list.removeLast();
-                        //insidePoints.add(point);
                         x0 = point.x;
                         y0 = point.y;
                         workMatrix[y0 * w + x0] = 1;
@@ -402,19 +339,6 @@ public class PolygonVectorizer {
                 }
                 point = list.getFirst();
                 path.lineTo(point.x, point.y);
-                /*
-                for (Point p : maxStackOfPoints) {
-                    if (canceled) return coloredPolygon;
-                    if (i == 0) {
-                        path.moveTo(p.x, p.y);
-                    } else {
-                        path.lineTo(p.x, p.y);
-                    }
-                    i++;
-                    workMatrix[p.y*w + p.x] = 3;
-                }
-                point = maxStackOfPoints.get(0);
-                path.lineTo(point.x, point.y);*/
             }
 
             int index;
@@ -422,8 +346,6 @@ public class PolygonVectorizer {
                 for(x0=minX;x0<=maxX;x0++) {
                     if(canceled)return coloredPolygon;
                     index = y0 * w + x0;
-                    //if (((workMatrix[index]!=0 && workMatrix[index]!=2)||(workMatrix[index]==3&&(x0==0||x0==w-1||y0==0||y0==h-1))) && visitMatrix[index]==0){ //&& path.contains(x0,y0)){// && visitMatrix[index]<workMatrix[index] && (true || path.contains(x0,y0)) ) {
-                    //if (visitMatrix[index]<workMatrix[index] && workMatrix[index]!=2){ //&& path.contains(x0,y0)){// && visitMatrix[index]<workMatrix[index] && (true || path.contains(x0,y0)) ) {
                     if(workMatrix[index]==1 || (workMatrix[index]==3 && (x0==0||x0==w-1||y0==0||y==h-1))){
                         visitMatrix[index] = workMatrix[index];
                     }
