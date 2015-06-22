@@ -107,7 +107,6 @@ public class PolygonVectorizer {
                         }
                         g.drawLine(x0, y0, x0, y0);
                     }
-                    //Arrays.fill(visitMatrix,(char)0);
                 }
                 destImagePanel.setImage(destImage);
             }
@@ -126,7 +125,7 @@ public class PolygonVectorizer {
                 if (visitMatrix[pixel] == 0) {
                     ColoredPolygon coloredPolygon = findShape(x0,y0);
                     coloredPolygons.add(coloredPolygon);
-                    if(System.currentTimeMillis()-timeOfLastUpdate>500)
+                    if(System.currentTimeMillis()-timeOfLastUpdate>16)
                     {
                         drawFunction();
                         timeOfLastUpdate = System.currentTimeMillis();
@@ -160,7 +159,6 @@ public class PolygonVectorizer {
         private ColoredPolygon findShape(int x,int y){
             ColoredPolygon coloredPolygon = new ColoredPolygon();
             Path2D.Float path = new Path2D.Float();
-            //LinkedList<Point> list = new LinkedList<>();
             int startColor = originalImage.getRGB(x,y);
             int rTotal=0,gTotal=0,bTotal=0;
             int count=0;
@@ -170,11 +168,6 @@ public class PolygonVectorizer {
             workMatrix[y*w+x] = 2;
             int x0=x,y0=y,x1,y1;
 
-
-            //list.add(new Point(x0-1,y0));
-            //list.add(new Point(x0+1,y0));
-            //list.add(new Point(x0,y0-1));
-            //list.add(new Point(x0,y0+1));
             list.clearAll();
             list.push(x0 - 1, y0);
             list.push(x0+1,y0);
@@ -190,9 +183,6 @@ public class PolygonVectorizer {
             int minX=x,maxX=x,minY=y,maxY=y;
             while(!list.isEmpty()){
                 if(canceled)return coloredPolygon;
-                //point = list.remove();
-                //x0 = point.x;
-                //y0 = point.y;
                 x0 = list.getLastX();
                 y0 = list.getLastY();
                 list.deleteLast();
@@ -220,10 +210,6 @@ public class PolygonVectorizer {
                     gTotal += greenOrig(x0,y0);
                     bTotal += blueOrig(x0,y0);
                     count++;
-                    //list.add(new Point(x0-1,y0));
-                    //list.add(new Point(x0+1,y0));
-                    //list.add(new Point(x0,y0-1));
-                    //list.add(new Point(x0,y0+1));
                     list.push(x0,y0+1);
                     list.push(x0+1,y0);
                     list.push(x0-1,y0);
@@ -247,19 +233,15 @@ public class PolygonVectorizer {
                         x0 = maxX+1;
                         y0 = maxY+1;
                     }
-            //list.add(new Point(x,y));
             list.push(x,y);
             workMatrix[y * w + x] = 3;
             boolean done = false;
             dir=0;
             do {
                 if(canceled)return coloredPolygon;
-                //point = list.getLast();
                 x1 = list.getLastX();
                 y1 = list.getLastY();
                 for(dir2=dir;dir2<8+dir;dir2++){
-                    //x0 = point.x + DIR_X[dir2%8];
-                    //y0 = point.y + DIR_Y[dir2%8];
                     x0 = x1 + DIR_X[dir2%8];
                     y0 = y1 + DIR_Y[dir2%8];
                     if(x0<0 || x0>=w || y0<0 || y0>=h)continue;
@@ -270,10 +252,8 @@ public class PolygonVectorizer {
                         if(isThereAnyEmptySpaces(x0,y0))
                         {
                             workMatrix[y0 * w + x0] = 3;
-                            //list.add(new Point(x0, y0));
                             list.push(x0,y0);
                             dir = (dir2 + 5) % 8;
-                            //dir = 0;
                             dir2 = dir;
                             break;
                         }
@@ -288,9 +268,6 @@ public class PolygonVectorizer {
                     if(list.size() == 1){
                         done = true;
                     }else {
-                        //point = list.removeLast();
-                        //x0 = point.x;
-                        //y0 = point.y;
                         x0 = list.getLastX();
                         y0 = list.getLastY();
                         list.deleteLast();
@@ -300,19 +277,6 @@ public class PolygonVectorizer {
             }while(!done);
 
             if(notDebug) {
-                /*int i = 0;
-
-                for (Point p : list) {
-                    if (canceled) return coloredPolygon;
-                    if (i == 0) {
-                        path.moveTo(p.x, p.y);
-                    } else {
-                        path.lineTo(p.x, p.y);
-                    }
-                    i++;
-                }
-                point = list.getFirst();
-                path.lineTo(point.x, point.y);*/
                 if(list.size()>0) {
                     path.moveTo(list.getX(0), list.getY(0));
                     for (int i = 1; i < list.size(); i++) {
