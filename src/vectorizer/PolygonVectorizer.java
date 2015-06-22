@@ -156,40 +156,6 @@ public class PolygonVectorizer {
             return workMatrix[y*w+x];
         }
 
-        private ArrayList<Point> maxStackOfPoints = new ArrayList<>();
-        private ArrayList<Point> workStackOfPoints = new ArrayList<>();
-        private int workX,workY;
-        private boolean boolStopBacktrack = false;
-        private void backtrackLongestPerimeter(int x,int y){
-            if(canceled || boolStopBacktrack)return;
-
-            workMatrix[y*w+x] = 3;
-            workStackOfPoints.add(new Point(x,y));
-
-            int x0,y0;
-            for(int i=0;i<8;i++){
-                x0 = x + DIR_X[i];
-                y0 = y + DIR_Y[i];
-                if(x0<0 || y0<0 || x0>=w || y0>=h)continue;
-                if(workMatrix[y0*w+x0]==2)
-                {
-                    backtrackLongestPerimeter(x0,y0);
-                }
-                else if(x0 == workX && y0 == workY && workStackOfPoints.size()>maxStackOfPoints.size()){
-                    System.out.format("Backtrack %d %d size=%d\n",x,y,workStackOfPoints.size());
-                    maxStackOfPoints.clear();
-                    maxStackOfPoints.addAll(workStackOfPoints);
-                    if(maxStackOfPoints.size()>8)
-                    {
-                        boolStopBacktrack = true;
-                        return;
-                    }
-                }
-            }
-            workStackOfPoints.remove(workStackOfPoints.size()-1);
-            workMatrix[y*w+x] = 2;
-        }
-
         private boolean isThereAnyEmptySpaces(int x0,int y0){
             return getWorkPixel(x0+1,y0)==0||
                     getWorkPixel(x0+1,y0+1)==0||
