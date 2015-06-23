@@ -57,4 +57,10 @@ public class StaticPointArray {
         return pointArrayY[count-1];
     }
 
+    public void setX(int i,int x){pointArrayX[i]=x;}
+    public void setY(int i,int y){pointArrayY[i]=y;}
+    public void setXY(int i,int x,int y){
+        pointArrayX[i] = x;
+        pointArrayY[i] = y;
+    }
 }

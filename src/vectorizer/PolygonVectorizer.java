@@ -280,9 +280,15 @@ public class PolygonVectorizer {
                         if(isThereAnyEmptySpaces(x0,y0))
                         {
                             workMatrix[y0 * w + x0] = 3;
-                            list.push(x0,y0);
+                            int i = list.size()-2;
+                            int j = list.size()-1;
+                            if(i>=0 && x0-list.getX(j) == list.getX(i)-list.getX(j) && y0-list.getY(j) == list.getY(i)-list.getY(j)) {
+                                list.setXY(j,x0,y0);
+                            }else {
+                                list.push(x0, y0);
+                            }
                             dir = (dir2 + 5) % 8;
-                            dir2 = dir;
+                            //dir2 = dir;
                             break;
                         }
                         else
@@ -292,7 +298,7 @@ public class PolygonVectorizer {
                     }
                 }
                 if(done)break;
-                if(dir2==8+dir){
+                /*if(dir2==8+dir){
                     if(list.size() == 1){
                         done = true;
                     }else {
@@ -301,7 +307,7 @@ public class PolygonVectorizer {
                         list.deleteLast();
                         workMatrix[y0 * w + x0] = 1;
                     }
-                }
+                }*/
             }while(!done);
 
             if(notDebug) {
