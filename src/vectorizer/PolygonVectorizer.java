@@ -111,31 +111,51 @@ public class PolygonVectorizer {
                 destImagePanel.setImage(destImage);
             }
         }
+        private void drawFunction(ArrayList<ColoredPolygon> coloredPolygonList){
+            if(destImagePanel==null)return;
+            Graphics2D g = destImage.createGraphics();
+            g.setStroke(new BasicStroke(0.5f));
+            for (ColoredPolygon c : coloredPolygonList) {
+                if (canceled) return;
+                g.setColor(new Color(c.color));
+                g.fill(c.path);
+            }
+            destImagePanel.setImage(destImage);
+        }
         @Override
         public void run() {
-
+            ArrayList<ColoredPolygon> localList = new ArrayList<>();
             visitMatrix = new char[h*w];
             workMatrix = new char[h*w];
-            int x0,y0;
+            int x0,y0,pixel;
+            boolean flag;
             long timeOfLastUpdate = System.currentTimeMillis();
-            for(int pixel=0;pixel<h*w;pixel++){
-                y0 = pixel/w;
-                x0 = pixel%w;
-                if(canceled)return;
-                if (visitMatrix[pixel] == 0) {
-                    ColoredPolygon coloredPolygon = findShape(x0,y0);
-                    coloredPolygons.add(coloredPolygon);
-                    if(System.currentTimeMillis()-timeOfLastUpdate>16)
-                    {
-                        drawFunction();
-                        timeOfLastUpdate = System.currentTimeMillis();
+            drawFunction();
+            for(y0=0;y0<h;y0++){
+                flag = false;
+                for(x0=0;x0<w;x0++){
+                    pixel = y0*w+x0;
+                    if(canceled)return;
+                    if (visitMatrix[pixel] == 0) {
+                        flag = true;
+                        ColoredPolygon coloredPolygon = findShape(x0,y0);
+                        localList.add(coloredPolygon);
                     }
-                    //if(!notDebug)
-                    //    break;
+                }
+                if(System.currentTimeMillis()-timeOfLastUpdate>16 && flag)
+                {
+                    timeOfLastUpdate = System.currentTimeMillis();
+                    drawFunction(localList);
+                    coloredPolygons.addAll(localList);
+                    localList.clear();
                 }
             }
-            if(canceled)return;
-            drawFunction();
+            if(localList.size()>0) {
+                drawFunction(localList);
+                coloredPolygons.addAll(localList);
+            }
+            //if(canceled)return;
+            //drawFunction();
         }
         public void setCanceled(boolean canceled) {
             this.canceled = canceled;
@@ -144,6 +164,10 @@ public class PolygonVectorizer {
         private char getWorkPixel(int x,int y){
             if(x<0 || x>=w || y<0 || y>=h)return 0;
             return workMatrix[y*w+x];
+        }
+
+        private boolean isWorkPixelNotVisited(int x,int y) {
+            return !(x < 0 || x >= w || y < 0 || y >= h) && workMatrix[y * w + x] == 0;
         }
 
         private boolean isThereAnyEmptySpaces(int x0,int y0){
@@ -205,15 +229,19 @@ public class PolygonVectorizer {
                         workMatrix[index]=2;
                     }else {
                         workMatrix[index]=1;
+                        rTotal += redOrig(x0,y0);
+                        gTotal += greenOrig(x0,y0);
+                        bTotal += blueOrig(x0,y0);
+                        count++;
                     }
-                    rTotal += redOrig(x0,y0);
-                    gTotal += greenOrig(x0,y0);
-                    bTotal += blueOrig(x0,y0);
-                    count++;
-                    list.push(x0,y0+1);
-                    list.push(x0+1,y0);
-                    list.push(x0-1,y0);
-                    list.push(x0,y0-1);
+                    if(isWorkPixelNotVisited(x0,y0+1))
+                        list.push(x0,y0+1);
+                    if(isWorkPixelNotVisited(x0+1,y0))
+                        list.push(x0+1,y0);
+                    if(isWorkPixelNotVisited(x0-1,y0))
+                        list.push(x0-1,y0);
+                    if(isWorkPixelNotVisited(x0,y0-1))
+                        list.push(x0,y0-1);
                 }
             }
 
