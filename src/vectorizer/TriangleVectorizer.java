@@ -1,5 +1,6 @@
-package mainpackage;
+package vectorizer;
 
+import mainpackage.Triangle;
 import utils.ImagePanel;
 
 import java.awt.*;
@@ -7,9 +8,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
 
-/**
- * Created by GeorgeRoscaneanu on 20.04.2015.
- */
 public class TriangleVectorizer {
     private BufferedImage originalImage;
     private BufferedImage destImage;
@@ -54,7 +52,7 @@ public class TriangleVectorizer {
             originalRedArray[i] = (char) (color & 0xff);
         }
     }
-
+    /*
     public void calculateEdgeData(){
         edgeDataArray = new int[area];
 
@@ -94,6 +92,7 @@ public class TriangleVectorizer {
             }
         }
     }
+    */
     public void setDestImagePanel(ImagePanel p){
         destImagePanel = p;
     }
@@ -109,6 +108,7 @@ public class TriangleVectorizer {
     private class Job extends Thread{
         private boolean canceled = false;
         private ArrayList<Triangle> triangles = new ArrayList<>();
+        private final Object triangleLock = new Object();
         @Override
         public void run() {
             try {
@@ -120,11 +120,8 @@ public class TriangleVectorizer {
             final Triangle t1 = new Triangle(0,0,w-1,0,w-1,h-1);
             final Triangle t2 = new Triangle(0,0,0,h-1,w-1,h-1);
 
-            Thread th = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    recTriangulation(t1);
-                }
+            Thread th = new Thread(() -> {
+                recTriangulation(t1);
             });
             th.start();
 
@@ -168,7 +165,7 @@ public class TriangleVectorizer {
             float xMax = triangle.xMax;
             float yMin = triangle.yMin;
             float yMax = triangle.yMax;
-            int rTotal=0,gTotal=0,bTotal=0,count=0,color;
+            int rTotal=0,gTotal=0,bTotal=0,count;
             int m;
 
             //System.out.format("triangulation (%d,%d) (%d,%d) (%d,%d)\n",x0,y0,x1,y1,x2,y2);
@@ -252,7 +249,7 @@ public class TriangleVectorizer {
             if(count==0)return;
             if(!fail || triangle.area<=3){
                 triangle.color = 0xff000000 | (rTotal<<16) | (gTotal<<8) | bTotal;
-                synchronized (triangles) {
+                synchronized (triangleLock) {
                     triangles.add(triangle);
                 }
             }else{
