@@ -70,6 +70,9 @@ public class PolygonVectorizer {
         private char workMatrix[];
         boolean notDebug = true;
         private ArrayList<ColoredPolygon> coloredPolygons = new ArrayList<>(1000);
+        private long startTime,endTime;
+        private long workMatrixResetTime,coverSearchTime,perimeterSearchTime,workMatrixTransferTime;
+
         private void drawFunction(){
             int x0,y0;
             if(destImagePanel!=null) {
@@ -124,9 +127,15 @@ public class PolygonVectorizer {
         }
         @Override
         public void run() {
+            workMatrixResetTime=0;
+            coverSearchTime=0;
+            perimeterSearchTime=0;
+            workMatrixTransferTime=0;
+
             ArrayList<ColoredPolygon> localList = new ArrayList<>();
             visitMatrix = new char[h*w];
             workMatrix = new char[h*w];
+
             int x0,y0,pixel;
             boolean flag;
             long timeOfLastUpdate = System.currentTimeMillis();
@@ -154,6 +163,17 @@ public class PolygonVectorizer {
                 drawFunction(localList);
                 coloredPolygons.addAll(localList);
             }
+
+
+            System.out.format("workMatrixResetTime = %d\n" +
+                            "coverSearchTime = %d\n" +
+                            "perimeterSearchTime = %d\n" +
+                            "workMatrixTransferTime = %d\n" +
+                            "-----------------------------------------\n",
+                    workMatrixResetTime,
+                    coverSearchTime,
+                    perimeterSearchTime,
+                    workMatrixTransferTime);
             //if(canceled)return;
             //drawFunction();
         }
@@ -188,7 +208,11 @@ public class PolygonVectorizer {
             int count=0;
             int currentColor;
 
-            Arrays.fill(workMatrix,(char)0);
+            startTime = System.currentTimeMillis();
+            //Arrays.fill(workMatrix,(char)0);
+            endTime = System.currentTimeMillis();
+            workMatrixResetTime += endTime-startTime;
+
             workMatrix[y*w+x] = 2;
             int x0=x,y0=y,x1,y1;
 
@@ -201,9 +225,10 @@ public class PolygonVectorizer {
             //Point point;
             rTotal += redOrig(x, y);
             gTotal += greenOrig(x, y);
-            bTotal += blueOrig(x,y);
+            bTotal += blueOrig(x, y);
             count++;
 
+            startTime = System.currentTimeMillis();
             int minX=x,maxX=x,minY=y,maxY=y;
             while(!list.isEmpty()){
                 if(canceled)return coloredPolygon;
@@ -244,6 +269,8 @@ public class PolygonVectorizer {
                         list.push(x0,y0-1);
                 }
             }
+            endTime = System.currentTimeMillis();
+            coverSearchTime += endTime-startTime;
 
             rTotal /= count;
             gTotal /= count;
@@ -251,6 +278,7 @@ public class PolygonVectorizer {
             int averageColor = 0xff000000 | (rTotal<<16) | (gTotal<<8) | bTotal;
 
             int dir,dir2;
+
 
             for(y0=minY;y0<=maxY;y0++)
                 for(x0=minX;x0<=maxX;x0++)
@@ -261,10 +289,16 @@ public class PolygonVectorizer {
                         x0 = maxX+1;
                         y0 = maxY+1;
                     }
+            /*
+            if(getWorkPixel(x,y-1)==2){
+                y=y-1;
+            }*/
+
             list.push(x,y);
             workMatrix[y * w + x] = 3;
             boolean done = false;
             dir=0;
+            startTime = System.currentTimeMillis();
             do {
                 if(canceled)return coloredPolygon;
                 x1 = list.getLastX();
@@ -320,7 +354,11 @@ public class PolygonVectorizer {
                     path.lineTo(list.getX(0), list.getY(0));
                 }
             }
+            endTime = System.currentTimeMillis();
 
+            perimeterSearchTime += endTime-startTime;
+
+            startTime = System.currentTimeMillis();
             int index;
             for(y0=minY;y0<=maxY;y0++)
                 for(x0=minX;x0<=maxX;x0++) {
@@ -329,9 +367,15 @@ public class PolygonVectorizer {
                     if(workMatrix[index]==1 || (workMatrix[index]==3 && (x0==0||x0==w-1||y0==0||y==h-1))){
                         visitMatrix[index] = workMatrix[index];
                     }
+                    workMatrix[index]=0;
                 }
+            endTime = System.currentTimeMillis();
+            workMatrixTransferTime += endTime-startTime;
+
             coloredPolygon.path = path;
             coloredPolygon.color = averageColor;
+
+
             return coloredPolygon;
         }
     }
