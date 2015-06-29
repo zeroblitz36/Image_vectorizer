@@ -14,8 +14,8 @@ public abstract class BaseVectorizer {
     protected int w,h,area;
     public int threshold;
     protected ImagePanel destImagePanel;
-    private Thread lastJob;
-    private final Object jobLock=new Object();
+    protected JobThread lastJob;
+    protected final Object jobLock=new Object();
 
     public abstract void startJob();
     public abstract void cancelLastJob();
@@ -75,5 +75,12 @@ public abstract class BaseVectorizer {
 
     public void setDestImagePanel(ImagePanel p){
         destImagePanel = p;
+    }
+
+    public class JobThread extends Thread{
+        protected boolean canceled = false;
+        public void setCanceled(boolean canceled) {
+            this.canceled = canceled;
+        }
     }
 }

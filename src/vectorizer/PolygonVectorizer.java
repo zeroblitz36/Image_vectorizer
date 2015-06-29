@@ -22,9 +22,9 @@ public class PolygonVectorizer extends BaseVectorizer {
     }
     private static final int DIR_X[] = new int[]{1,1,0,-1,-1,-1,0,1};
     private static final int DIR_Y[] = new int[]{0,1,1,1,0,-1,-1,-1};
-    private Job lastJob;
-    private class Job extends Thread{
-        private boolean canceled = false;
+
+    private class Job extends JobThread{
+        //private boolean canceled = false;
         /*
         0 = unvisited
         1 = visited , not-wall
@@ -140,9 +140,10 @@ public class PolygonVectorizer extends BaseVectorizer {
                     perimeterSearchTime,
                     workMatrixTransferTime);
         }
+        /*
         public void setCanceled(boolean canceled) {
             this.canceled = canceled;
-        }
+        }*/
 
         private char getWorkPixel(int x,int y){
             if(x<0 || x>=w || y<0 || y>=h)return 0;
@@ -329,7 +330,6 @@ public class PolygonVectorizer extends BaseVectorizer {
         }
     }
 
-    private final Object jobLock=new Object();
     public void startJob(){
         synchronized (jobLock) {
             if (lastJob != null) {
