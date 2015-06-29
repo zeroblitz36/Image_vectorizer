@@ -8,19 +8,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class TriangleVectorizer {
-    private BufferedImage originalImage;
-    private BufferedImage destImage;
-    private char[] originalRedArray;
-    private char[] originalGreenArray;
-    private char[] originalBlueArray;
-    private int[] originalColorArray;
-    private int w,h,area;
-    public int threshold;
-    private ImagePanel destImagePanel;
+public class TriangleVectorizer extends BaseVectorizer{
     private Random random = new Random(System.currentTimeMillis());
-    private int[] edgeDataArray;
-    private Job lastJob;
 
 
     public TriangleVectorizer(BufferedImage image){
@@ -58,15 +47,33 @@ public class TriangleVectorizer {
     }
 
     public void startJob() {
-        if(lastJob!=null){
-            lastJob.setCanceled(true);
+        synchronized (jobLock) {
+            if (lastJob != null) {
+                lastJob.setCanceled(true);
+                try {
+                    lastJob.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            lastJob = new Job();
+            lastJob.start();
         }
-        lastJob = new Job();
-        lastJob.start();
+    }
+    public void cancelLastJob(){
+        synchronized (jobLock){
+            if (lastJob != null) {
+                lastJob.setCanceled(true);
+                try {
+                    lastJob.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
-    private class Job extends Thread{
-        private boolean canceled = false;
+    private class Job extends JobThread{
         private ArrayList<Triangle> triangles = new ArrayList<>();
         private final Object triangleLock = new Object();
         @Override
@@ -106,12 +113,7 @@ public class TriangleVectorizer {
             }
         }
 
-        public void setCanceled(boolean canceled) {
-            this.canceled = canceled;
-        }
-
         public void recTriangulation(Triangle triangle){
-            //triangle.expand(0,h-1,0,w-1);
             float i0=0,i1=0,man;
             int flag;
             float a;
@@ -127,8 +129,6 @@ public class TriangleVectorizer {
             float yMax = triangle.yMax;
             int rTotal=0,gTotal=0,bTotal=0,count;
             int m;
-
-            //System.out.format("triangulation (%d,%d) (%d,%d) (%d,%d)\n",x0,y0,x1,y1,x2,y2);
 
             rTotal += redOrig((int)x0,(int)y0);
             rTotal += redOrig((int)x1,(int)y1);
@@ -180,10 +180,8 @@ public class TriangleVectorizer {
                     if(i0 < xMin) i0 = xMin;
                     if(i1 > xMax) i1 = xMax;
                     if(canceled)return;
-                    //System.out.format("Points on line %d from %d to %d: ",(int)y,(int)i0,(int)i1);
                     for (int x = (int) i0; x <= i1 && !fail; x++) {
                         if(canceled)return;
-                        //System.out.format("(%d,%d) ",x,(int)y);
                         count++;
                         if(pass == 0) {
                             rTotal += redOrig(x, y);
@@ -197,7 +195,6 @@ public class TriangleVectorizer {
                                 fail = true;
                         }
                     }
-                    //System.out.println();
                 }
                 if(pass==0) {
                     rTotal /= count;
@@ -219,7 +216,6 @@ public class TriangleVectorizer {
                 double dist2 = Math.sqrt((x0-x2)*(x0-x2) + (y0-y2)*(y0-y2));
 
                 float r = random.nextFloat()*0.6f + 0.2f;
-                //r = 0.5f;
                 float delta = 0.01f;
                 Triangle t1,t2;
                 if(dist0>=dist1 && dist0>=dist2){
@@ -240,24 +236,5 @@ public class TriangleVectorizer {
                 if(t2.area>0.5)recTriangulation(t2);
             }
         }
-    }
-
-
-    public float interpolate(float a, float b,float x){
-        return a + x*(b-a);
-    }
-
-    public char redOrig(int x,int y){
-        return originalRedArray[y*w+x];
-    }
-    public char blueOrig(int x,int y){
-        return originalBlueArray[y*w+x];
-    }
-    public char greenOrig(int x,int y){
-        return originalGreenArray[y*w+x];
-    }
-
-    private char abs(char a,char b){
-        return (char) (a>b ? a-b : b-a);
     }
 }

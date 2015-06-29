@@ -12,32 +12,16 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class SquareVectorizer {
-    public int threshold;
+public class SquareVectorizer extends BaseVectorizer{
     private ArrayList<SquareFragment> fragList = new ArrayList<>();
     private final Object fragListLock = new Object();
-    private Random random;
+    private Random random = new Random(System.currentTimeMillis());
     long startTime, endTime;
-    //private ExecutorService executorService = Executors.newFixedThreadPool(4);
-    private BufferedImage originalImage;
-    private ImagePanel destImagePanel;
-    private Job lastJob;
-    private final Object lastJobLock = new Object();
-
-    public SquareVectorizer(BufferedImage image) {
-        originalImage = image;
-        random = new Random(System.currentTimeMillis());
-    }
-
-    public void setDestImagePanel(ImagePanel p){
-        destImagePanel = p;
-    }
-
 
 
 
     public void startJob() {
-        synchronized (lastJobLock) {
+        synchronized (jobLock) {
             if (lastJob != null) {
                 lastJob.setCanceled(true);
                 try {
@@ -51,7 +35,7 @@ public class SquareVectorizer {
         }
     }
     public void cancelLastJob(){
-        synchronized (lastJobLock){
+        synchronized (jobLock){
             if (lastJob != null) {
                 lastJob.setCanceled(true);
                 try {
@@ -62,15 +46,11 @@ public class SquareVectorizer {
             }
         }
     }
-    private class Job extends Thread{
-        private boolean isCanceled = false;
-        public void setCanceled(boolean canceled) {
-            this.isCanceled = canceled;
-        }
+    private class Job extends JobThread{
 
         @Override
         public void run() {
-            if (originalImage == null || isCanceled) return;
+            if (originalImage == null || canceled) return;
             int w = originalImage.getWidth();
             int h = originalImage.getHeight();
             SquareFragment squareFragment = new SquareFragment(0, w - 1, 0, h - 1, -1);
@@ -79,25 +59,19 @@ public class SquareVectorizer {
             splitRecFragCheck(squareFragment);
             //executorService.shutdown();
             endTime = System.currentTimeMillis();
-            if (isCanceled) return;
-            //System.out.format("Finished vectorizing: %d shapes %.3f s\n", fragList.size(),(endTime-startTime)/1000.f);
+            if (canceled) return;
             startTime = System.currentTimeMillis();
             BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
             Graphics2D g = image.createGraphics();
             for (SquareFragment s : fragList) {
-                if (isCanceled) return;
+                if (canceled) return;
                 g.setColor(new Color(s.color));
                 g.fillRect(s.l, s.t, s.r - s.l + 1, s.d - s.t + 1);
-                //g.setColor(Color.GRAY);
-                //g.drawRect(s.l, s.t, s.r - s.l + 1, s.d - s.t + 1);
             }
             endTime = System.currentTimeMillis();
-            if (isCanceled) return;
+            if (canceled) return;
             if(destImagePanel!=null)
                 destImagePanel.setImage(image);
-            //mainForm.imagePanel23.setImage(image);
-            //System.out.format("Finished drawing: %d shapes %.3f s\n", fragList.size(),(endTime-startTime)/1000.f);
-            //System.out.format("Approx mainImageFile size: %d KB\n",fragList.size()*12/1024);
         }
 
         private void recFragCheck(SquareFragment s) {
@@ -109,7 +83,7 @@ public class SquareVectorizer {
 
             for (int y = s.t; y <= s.d && !fail; y++)
                 for (int x = s.l; x <= s.r && !fail; x++) {
-                    if (isCanceled) return;
+                    if (canceled) return;
                     count++;
                     color = originalImage.getRGB(x, y);
                     b = color & 0xff;
@@ -136,7 +110,7 @@ public class SquareVectorizer {
             int avgColor = 0xff000000 | (rTotal << 16) | (gTotal << 8) | bTotal;
             for (int y = s.t; y <= s.d && !fail; y++)
                 for (int x = s.l; x <= s.r && !fail; x++) {
-                    if (isCanceled) return;
+                    if (canceled) return;
                     color = originalImage.getRGB(x, y);
                     if (Utility.manhattanDistance(color, avgColor) > threshold)
                         fail = true;

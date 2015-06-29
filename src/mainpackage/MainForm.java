@@ -54,7 +54,8 @@ public class MainForm {
 
                 if(squareVectorizer!=null)
                     squareVectorizer.cancelLastJob();
-                squareVectorizer = new SquareVectorizer(mainBufferedImage);
+                squareVectorizer = new SquareVectorizer();
+                squareVectorizer.setOriginalImage(mainBufferedImage);
                 squareVectorizer.setDestImagePanel(imagePanel23);
 
                 if(polygonVectorizer!=null)

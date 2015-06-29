@@ -7,10 +7,10 @@ import java.awt.image.BufferedImage;
 public abstract class BaseVectorizer {
     protected BufferedImage originalImage;
     protected BufferedImage destImage;
-    private char[] originalRedArray;
-    private char[] originalGreenArray;
-    private char[] originalBlueArray;
-    private int[] originalColorArray;
+    protected char[] originalRedArray;
+    protected char[] originalGreenArray;
+    protected char[] originalBlueArray;
+    protected int[] originalColorArray;
     protected int w,h,area;
     public int threshold;
     protected ImagePanel destImagePanel;
@@ -34,7 +34,7 @@ public abstract class BaseVectorizer {
         return originalGreenArray[y*w+x];
     }
 
-    private char abs(char a,char b){
+    protected char abs(char a,char b){
         return (char) (a>b ? a-b : b-a);
     }
 
