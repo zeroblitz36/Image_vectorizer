@@ -52,47 +52,7 @@ public class TriangleVectorizer {
             originalRedArray[i] = (char) (color & 0xff);
         }
     }
-    /*
-    public void calculateEdgeData(){
-        edgeDataArray = new int[area];
 
-        int d = 2;
-        int numberOfLines = 3;
-        int minDist = 1;
-        int numberOfDists = 2;
-        int distStep = 1;
-
-        ArrayList<Point> pointList = new ArrayList<>(200);
-        for(d=minDist;d<=numberOfDists*distStep;d+=distStep) {
-            for (int a = 0; a < numberOfLines; a++) {
-                double angle = Math.PI / (numberOfLines+1) * a;
-                pointList.add(new Point((int) (Math.cos(angle) * d),(int) (Math.sin(angle) * d)));
-            }
-        }
-        int xa1,xa2,ya1,ya2;
-        int n = pointList.size();
-        Point p;
-        for (int x = d; x < w - d; x++) {
-            for (int y = d; y < h - d; y++) {
-                for (int i = 0; i < n; i++) {
-                    p = pointList.get(i);
-                    xa1 = x + p.x;
-                    ya1 = y + p.y;
-                    xa2 = x - p.x;
-                    ya2 = y - p.y;
-                    try {
-                        edgeDataArray[w*y+x] +=
-                                abs(redOrig(xa1,ya1),redOrig(x,y)) + abs(redOrig(xa2,ya2),redOrig(x,y)) +
-                                abs(greenOrig(xa1, ya1),greenOrig(x, y)) + abs(greenOrig(xa2, ya2),greenOrig(x,y)) +
-                                abs(blueOrig(xa1, ya1),blueOrig(x, y)) + abs(blueOrig(xa2, ya2),blueOrig(x, y));
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
-    */
     public void setDestImagePanel(ImagePanel p){
         destImagePanel = p;
     }
