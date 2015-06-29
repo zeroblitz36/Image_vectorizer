@@ -139,7 +139,7 @@ public class TriangleVectorizer {
                 Graphics2D g = destImage.createGraphics();
                 for(Triangle t:triangles){
                     g.setColor(new Color(t.color));
-                    g.fill(t.path);
+                    g.fill(t.getClonePath());
                 }
 
                 destImagePanel.setImage(destImage);

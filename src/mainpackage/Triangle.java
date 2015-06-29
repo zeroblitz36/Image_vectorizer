@@ -3,9 +3,6 @@ package mainpackage;
 import java.awt.*;
 import java.awt.geom.Path2D;
 
-/**
- * Created by GeorgeRoscaneanu on 20.04.2015.
- */
 public class Triangle {
     public float x0,y0;
     public float x1,y1;
@@ -17,7 +14,7 @@ public class Triangle {
     //public float xArray[];
     //public float yArray[];
     //public Polygon polygon;
-    public Path2D.Float path;
+    private Path2D.Float path;
     public Triangle(float x0, float y0, float x1, float y1, float x2, float y2) {
         this.x0 = x0;
         this.y0 = y0;
@@ -29,12 +26,12 @@ public class Triangle {
         //xArray = new float[]{x0,x1,x2};
         //yArray = new float[]{y0,y1,y2};
         //polygon = new Polygon(xArray,yArray,3);
-
+        /*
         path = new Path2D.Float();
         path.moveTo(x0,y0);
         path.lineTo(x1,y1);
         path.lineTo(x2,y2);
-        path.lineTo(x0,y0);
+        path.lineTo(x0,y0);*/
 
         yMin = y0;
         if(yMin > y1) yMin = y1;
@@ -55,7 +52,7 @@ public class Triangle {
 
         area = Math.abs(x0*(y1-y2)+x1*(y2-y0)+x2*(y0-y1))/2.f;
     }
-
+    /*
     public void expand(int t,int d,int l,int r){
         float midX = (x0+x1+x2)/3;
         float midY = (y0+y1+y2)/3;
@@ -106,8 +103,8 @@ public class Triangle {
 
         area = Math.abs(x0*(y1-y2)+x1*(y2-y0)+x2*(y0-y1))/2.f;
 
-    }
-
+    }*/
+    /*
     public void iterateAllPointsInside(){
         float i0=0,i1=0,man;
         int flag;
@@ -148,7 +145,25 @@ public class Triangle {
             }
             System.out.println();
         }
+    }*/
+
+    public Path2D.Float getPath(){
+        if(path==null){
+            path = new Path2D.Float();
+            path.moveTo(x0,y0);
+            path.lineTo(x1,y1);
+            path.lineTo(x2,y2);
+            path.lineTo(x0,y0);
+        }
+        return path;
     }
 
-
+    public Path2D.Float getClonePath(){
+        Path2D.Float p = new Path2D.Float();
+        p.moveTo(x0,y0);
+        p.lineTo(x1,y1);
+        p.lineTo(x2,y2);
+        p.lineTo(x0,y0);
+        return p;
+    }
 }
