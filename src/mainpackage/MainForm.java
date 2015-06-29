@@ -59,7 +59,8 @@ public class MainForm {
 
                 if(polygonVectorizer!=null)
                     polygonVectorizer.cancelLastJob();
-                polygonVectorizer = new PolygonVectorizer(mainBufferedImage);
+                polygonVectorizer = new PolygonVectorizer();
+                polygonVectorizer.setOriginalImage(mainBufferedImage);
                 polygonVectorizer.initialize();
                 polygonVectorizer.setDestImagePanel(imagePanel22);
 
