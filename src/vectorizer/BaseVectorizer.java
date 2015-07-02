@@ -12,7 +12,7 @@ public abstract class BaseVectorizer {
     protected char[] originalBlueArray;
     protected int[] originalColorArray;
     protected int w,h,area;
-    public int threshold;
+    public int threshold=-1;
     protected ImagePanel destImagePanel;
     protected JobThread lastJob;
     protected final Object jobLock=new Object();
@@ -65,12 +65,15 @@ public abstract class BaseVectorizer {
     }
 
     public void setOriginalImage(BufferedImage image){
-        cancelLastJob();
-        originalImage = image;
-        w = originalImage.getWidth();
-        h = originalImage.getHeight();
-        area = w*h;
-        destImage = new BufferedImage(w,h,BufferedImage.TYPE_4BYTE_ABGR);
+        if(originalImage==null || image!=originalImage) {
+            cancelLastJob();
+            originalImage = image;
+            w = originalImage.getWidth();
+            h = originalImage.getHeight();
+            area = w * h;
+            destImage = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
+            initialize();
+        }
     }
 
     public void setDestImagePanel(ImagePanel p){
