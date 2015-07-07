@@ -1,11 +1,8 @@
 package vectorizer;
 
-import mainpackage.Triangle;
 import utils.ImagePanel;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;

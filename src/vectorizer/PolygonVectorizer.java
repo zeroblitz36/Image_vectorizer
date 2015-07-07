@@ -1,6 +1,5 @@
 package vectorizer;
 
-import utils.ColoredPolygon;
 import utils.StaticPointArray;
 import utils.Utility;
 

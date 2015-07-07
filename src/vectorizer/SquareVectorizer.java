@@ -1,23 +1,20 @@
 package vectorizer;
 
-import mainpackage.MainForm;
-import mainpackage.Triangle;
-import utils.ImagePanel;
 import utils.Utility;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class SquareVectorizer extends BaseVectorizer{
-    private ArrayList<SquareFragment> fragList = new ArrayList<>();
+    private ArrayList<SquareFragment> lastSavedSquareList;
     private final Object fragListLock = new Object();
     private Random random = new Random(System.currentTimeMillis());
     long startTime, endTime;
-
 
 
     public void startJob() {
@@ -47,7 +44,7 @@ public class SquareVectorizer extends BaseVectorizer{
         }
     }
     private class Job extends JobThread{
-
+        private ArrayList<SquareFragment> fragList = new ArrayList<>();
         @Override
         public void run() {
             if (originalImage == null || canceled) return;
@@ -59,6 +56,7 @@ public class SquareVectorizer extends BaseVectorizer{
             splitRecFragCheck(squareFragment);
             //executorService.shutdown();
             endTime = System.currentTimeMillis();
+            lastSavedSquareList = fragList;
             if (canceled) return;
             startTime = System.currentTimeMillis();
             BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
@@ -166,22 +164,40 @@ public class SquareVectorizer extends BaseVectorizer{
                 }
             }
         }
-
     }
 
-    public class SquareFragment{
-        public int l,r,t,d,color;
-
-        public SquareFragment(int l, int r, int t, int d, int color) {
-            this.l = l;
-            this.r = r;
-            this.t = t;
-            this.d = d;
-            this.color = color;
+    public void exportToOutputStream(DataOutputStream os) {
+        try {
+            os.writeByte(SQUARE_TYPE);
+            os.writeInt(lastSavedSquareList.size());
+            for(SquareFragment s : lastSavedSquareList){
+                os.writeInt(s.color);
+                os.writeInt(s.l);
+                os.writeInt(s.r);
+                os.writeInt(s.t);
+                os.writeInt(s.d);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
 
-        public boolean isValid(){
-            return l<=r && t<=d;
+    public void importFromInputStream(DataInputStream is) {
+        try{
+            byte type = is.readByte();
+            if(type!=SQUARE_TYPE)throw new RuntimeException("Incorrect vectorizer");
+            int count = is.readInt();
+            ArrayList<SquareFragment> list = new ArrayList<>(count);
+            int color,l,r,t,d;
+            for(int i=0;i<count;i++){
+                color = is.readInt();
+                l = is.readInt();
+                r = is.readInt();
+                t = is.readInt();
+                d = is.readInt();
+            }
+        }catch (IOException e){
+            e.printStackTrace();
         }
     }
 }

@@ -1,4 +1,6 @@
-package utils;
+package vectorizer;
+
+import utils.StaticPointArray;
 
 import java.awt.geom.Path2D;
 

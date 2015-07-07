@@ -1,4 +1,4 @@
-package mainpackage;
+package vectorizer;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
