@@ -3,9 +3,7 @@ package vectorizer;
 import utils.ImagePanel;
 
 import java.awt.*;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -214,41 +212,23 @@ public class TriangleVectorizer extends BaseVectorizer{
         }
     }
 
-    public void exportToOutputStream(DataOutputStream os) {
+    public void exportToOutputStream(OutputStream os) {
         try {
-            os.writeByte(SQUARE_TYPE);
-            os.writeInt(lastSavedTriangleList.size());
-            for(Triangle t : lastSavedTriangleList){
-                os.writeFloat(t.x0);
-                os.writeFloat(t.y0);
-                os.writeFloat(t.x1);
-                os.writeFloat(t.y1);
-                os.writeFloat(t.x2);
-                os.writeFloat(t.y2);
-            }
+            ObjectOutput oo = new ObjectOutputStream(os);
+            oo.writeObject(lastSavedTriangleList);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    public void importFromInputStream(DataInputStream is) {
+    public void importFromInputStream(InputStream is) {
         try {
-            byte type = is.readByte();
-            if(type!=SQUARE_TYPE)throw new RuntimeException("Incorrect vectorizer");
-            int count = is.readInt();
-            ArrayList<Triangle> list = new ArrayList<>(count);
-            float x0, y0, x1, y1, x2, y2;
-            for (int i = 0; i < count; i++) {
-                x0 = is.readFloat();
-                y0 = is.readFloat();
-                x1 = is.readFloat();
-                y1 = is.readFloat();
-                x2 = is.readFloat();
-                y2 = is.readFloat();
-                list.add(new Triangle(x0, y0, x1, y1, x2, y2));
-            }
+            ObjectInput oi = new ObjectInputStream(is);
+            ArrayList<Triangle> list = (ArrayList<Triangle>) oi.readObject();
             lastSavedTriangleList = list;
             drawTriangles(lastSavedTriangleList);
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

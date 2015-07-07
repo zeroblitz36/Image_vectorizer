@@ -5,6 +5,8 @@ import utils.ImagePanel;
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public abstract class BaseVectorizer {
     protected BufferedImage originalImage;
@@ -27,8 +29,8 @@ public abstract class BaseVectorizer {
     public abstract void startJob();
     public abstract void cancelLastJob();
 
-    public abstract void exportToOutputStream(DataOutputStream os);
-    public abstract void importFromInputStream(DataInputStream is);
+    public abstract void exportToOutputStream(OutputStream os);
+    public abstract void importFromInputStream(InputStream is);
 
     public float interpolate(float a, float b,float x){
         return a + x*(b-a);

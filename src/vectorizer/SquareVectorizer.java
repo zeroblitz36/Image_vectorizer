@@ -4,9 +4,7 @@ import utils.Utility;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -177,40 +175,24 @@ public class SquareVectorizer extends BaseVectorizer{
         }
     }
 
-    public void exportToOutputStream(DataOutputStream os) {
+    public void exportToOutputStream(OutputStream os) {
         try {
-            os.writeByte(SQUARE_TYPE);
-            os.writeInt(lastSavedSquareList.size());
-            for(SquareFragment s : lastSavedSquareList){
-                os.writeInt(s.color);
-                os.writeInt(s.l);
-                os.writeInt(s.r);
-                os.writeInt(s.t);
-                os.writeInt(s.d);
-            }
+            ObjectOutput oo = new ObjectOutputStream(os);
+            oo.writeObject(lastSavedSquareList);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void importFromInputStream(DataInputStream is) {
+    public void importFromInputStream(InputStream is) {
         try{
-            byte type = is.readByte();
-            if(type!=SQUARE_TYPE)throw new RuntimeException("Incorrect vectorizer");
-            int count = is.readInt();
-            ArrayList<SquareFragment> list = new ArrayList<>(count);
-            int color,l,r,t,d;
-            for(int i=0;i<count;i++){
-                color = is.readInt();
-                l = is.readInt();
-                r = is.readInt();
-                t = is.readInt();
-                d = is.readInt();
-                list.add(new SquareFragment(l,r,t,d,color));
-            }
+            ObjectInput oi = new ObjectInputStream(is);
+            ArrayList<SquareFragment> list = (ArrayList<SquareFragment>) oi.readObject();
             lastSavedSquareList = list;
             drawFunction(lastSavedSquareList);
         }catch (IOException e){
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

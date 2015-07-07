@@ -6,9 +6,7 @@ import utils.Utility;
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 public class PolygonVectorizer extends BaseVectorizer {
@@ -354,50 +352,23 @@ public class PolygonVectorizer extends BaseVectorizer {
         }
     }
 
-    public void exportToOutputStream(DataOutputStream os){
+    public void exportToOutputStream(OutputStream os){
         try{
-            os.writeByte(POLYGON_TYPE);
-            os.writeInt(lastSavedPolygonList.size());
-            int size;
-            for(ColoredPolygon c : lastSavedPolygonList){
-                os.writeInt(c.color);
-                size = c.pointArray.size();
-                os.writeInt(size);
-                for(int i=0;i<size;i++){
-                    os.writeInt(c.pointArray.getX(i));
-                    os.writeInt(c.pointArray.getY(i));
-                }
-            }
+            ObjectOutput oo = new ObjectOutputStream(os);
+            oo.writeObject(lastSavedPolygonList);
         }catch (IOException e){
             e.printStackTrace();
         }
     }
-    public void importFromInputStream(DataInputStream is){
+    public void importFromInputStream(InputStream is){
         try{
-            byte type = is.readByte();
-            if(type!=POLYGON_TYPE)throw new RuntimeException("Incorrect vectorizer");
-            int count = is.readInt();
-            ArrayList<ColoredPolygon> list = new ArrayList<>(count);
-            int x,y;
-            int size;
-            int color;
-            for(int i = 0;i < count;i++){
-                color = is.readInt();
-                size = is.readInt();
-                StaticPointArray spa = new StaticPointArray(size);
-                for(int j=0;j<size;j++){
-                    x = is.readInt();
-                    y = is.readInt();
-                    spa.push(x,y);
-                }
-                ColoredPolygon p = new ColoredPolygon();
-                p.pointArray = spa;
-                p.color = color;
-                list.add(p);
-            }
+            ObjectInput oi = new ObjectInputStream(is);
+            ArrayList<ColoredPolygon> list = (ArrayList<ColoredPolygon>) oi.readObject();
             lastSavedPolygonList = list;
             drawFunction(lastSavedPolygonList);
         }catch (IOException e){
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
