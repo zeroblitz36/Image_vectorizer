@@ -3,18 +3,18 @@ package utils;
 import java.io.Serializable;
 
 public class StaticPointArray implements Serializable{
-    private int[] pointArrayX;
-    private int[] pointArrayY;
+    private short[] pointArrayX;
+    private short[] pointArrayY;
     private int count;
     private int size;
 
     public StaticPointArray(int size){
         this.size = size;
-        pointArrayX = new int[size];
-        pointArrayY = new int[size];
+        pointArrayX = new short[size];
+        pointArrayY = new short[size];
     }
 
-    public void push(int x,int y){
+    public void push(short x,short y){
         if(count<size) {
             pointArrayX[count] = x;
             pointArrayY[count] = y;
@@ -44,23 +44,23 @@ public class StaticPointArray implements Serializable{
         return count;
     }
 
-    public int getX(int i){
+    public short getX(int i){
         return pointArrayX[i];
     }
-    public int getY(int i){
+    public short getY(int i){
         return pointArrayY[i];
     }
 
-    public int getLastX(){
+    public short getLastX(){
         return pointArrayX[count-1];
     }
-    public int getLastY(){
+    public short getLastY(){
         return pointArrayY[count-1];
     }
 
-    public void setX(int i,int x){pointArrayX[i]=x;}
-    public void setY(int i,int y){pointArrayY[i]=y;}
-    public void setXY(int i,int x,int y){
+    public void setX(short i,short x){pointArrayX[i]=x;}
+    public void setY(short i,short y){pointArrayY[i]=y;}
+    public void setXY(int i,short x,short y){
         pointArrayX[i] = x;
         pointArrayY[i] = y;
     }

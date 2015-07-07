@@ -59,9 +59,7 @@ public class SquareVectorizer extends BaseVectorizer{
         @Override
         public void run() {
             if (originalImage == null || canceled) return;
-            int w = originalImage.getWidth();
-            int h = originalImage.getHeight();
-            SquareFragment squareFragment = new SquareFragment(0, w - 1, 0, h - 1, -1);
+            SquareFragment squareFragment = new SquareFragment((short)0,(short) (w - 1),(short) 0, (short)(h - 1), -1);
             startTime = System.currentTimeMillis();
             splitRecFragCheck(squareFragment);
             endTime = System.currentTimeMillis();
@@ -128,13 +126,13 @@ public class SquareVectorizer extends BaseVectorizer{
                     fragList.add(s);
                 }
             } else {
-                int midX = (int) (s.l + (random.nextFloat() / 2 + 0.25f) * (s.r - s.l));
-                int midY = (int) (s.t + (random.nextFloat() / 2 + 0.25f) * (s.d - s.t));
+                short midX = (short) (s.l + (random.nextFloat() / 2 + 0.25f) * (s.r - s.l));
+                short midY = (short) (s.t + (random.nextFloat() / 2 + 0.25f) * (s.d - s.t));
 
                 SquareFragment s1 = new SquareFragment(s.l, midX, s.t, midY, -1);
-                SquareFragment s2 = new SquareFragment(midX + 1, s.r, s.t, midY, -1);
-                SquareFragment s3 = new SquareFragment(s.l, midX, midY + 1, s.d, -1);
-                SquareFragment s4 = new SquareFragment(midX + 1, s.r, midY + 1, s.d, -1);
+                SquareFragment s2 = new SquareFragment((short) (midX + 1), s.r, s.t, midY, -1);
+                SquareFragment s3 = new SquareFragment(s.l, midX, (short) (midY + 1), s.d, -1);
+                SquareFragment s4 = new SquareFragment((short)(midX + 1), s.r, (short) (midY + 1), s.d, -1);
 
                 if (s1.isValid()) recFragCheck(s1);
                 if (s2.isValid()) recFragCheck(s2);
@@ -145,14 +143,14 @@ public class SquareVectorizer extends BaseVectorizer{
 
 
         private void splitRecFragCheck(SquareFragment s) {
-            int midX = (int) (s.l + (random.nextFloat() / 2 + 0.25f) * (s.r - s.l));
-            int midY = (int) (s.t + (random.nextFloat() / 2 + 0.25f) * (s.d - s.t));
+            short midX = (short) (s.l + (random.nextFloat() / 2 + 0.25f) * (s.r - s.l));
+            short midY = (short) (s.t + (random.nextFloat() / 2 + 0.25f) * (s.d - s.t));
 
             SquareFragment squareFragments[] = new SquareFragment[]{
                     new SquareFragment(s.l, midX, s.t, midY, -1),
-                    new SquareFragment(midX + 1, s.r, s.t, midY, -1),
-                    new SquareFragment(s.l, midX, midY + 1, s.d, -1),
-                    new SquareFragment(midX + 1, s.r, midY + 1, s.d, -1)
+                    new SquareFragment((short) (midX + 1), s.r, s.t, midY, -1),
+                    new SquareFragment(s.l, midX, (short) (midY + 1), s.d, -1),
+                    new SquareFragment((short)(midX + 1), s.r, (short) (midY + 1), s.d, -1)
             };
             ArrayList<Thread> threads = new ArrayList<>(4);
             for (SquareFragment squareFragment : squareFragments) {
@@ -178,6 +176,7 @@ public class SquareVectorizer extends BaseVectorizer{
     public void exportToOutputStream(OutputStream os) {
         try {
             ObjectOutput oo = new ObjectOutputStream(os);
+            System.out.format("Estimated file size = %d B\n",lastSavedSquareList.size()*(12));
             oo.writeObject(lastSavedSquareList);
         } catch (IOException e) {
             e.printStackTrace();

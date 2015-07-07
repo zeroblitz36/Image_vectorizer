@@ -15,7 +15,8 @@ public abstract class BaseVectorizer {
     protected char[] originalGreenArray;
     protected char[] originalBlueArray;
     protected int[] originalColorArray;
-    protected int w,h,area;
+    protected short w,h;
+    protected int area;
     public int threshold=-1;
     protected ImagePanel destImagePanel;
     protected JobThread lastJob;
@@ -80,8 +81,8 @@ public abstract class BaseVectorizer {
         if(originalImage==null || image!=originalImage) {
             cancelLastJob();
             originalImage = image;
-            w = originalImage.getWidth();
-            h = originalImage.getHeight();
+            w = (short) originalImage.getWidth();
+            h = (short) originalImage.getHeight();
             area = w * h;
             destImage = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
             initialize();

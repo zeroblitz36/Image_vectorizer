@@ -111,7 +111,8 @@ public class PolygonVectorizer extends BaseVectorizer {
             visitMatrix = new char[h*w];
             workMatrix = new char[h*w];
 
-            int x0,y0,pixel;
+            short x0,y0;
+            int pixel;
             boolean flag;
             long timeOfLastUpdate = System.currentTimeMillis();
             drawFunction();
@@ -170,7 +171,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                     getWorkPixel(x0,y0-1)==0||
                     getWorkPixel(x0+1,y0-1)==0;
         }
-        private ColoredPolygon findShape(int x,int y){
+        private ColoredPolygon findShape(short x,short y){
             ColoredPolygon coloredPolygon = new ColoredPolygon();
             Path2D.Float path = new Path2D.Float();
             int startColor = originalImage.getRGB(x,y);
@@ -184,13 +185,13 @@ public class PolygonVectorizer extends BaseVectorizer {
             workMatrixResetTime += endTime-startTime;
 
             workMatrix[y*w+x] = 2;
-            int x0=x,y0=y,x1,y1;
+            short x0=x,y0=y,x1,y1;
 
             list.clearAll();
-            list.push(x0 - 1, y0);
-            list.push(x0+1,y0);
-            list.push(x0,y0+1);
-            list.push(x0,y0-1);
+            list.push((short) (x0 - 1), y0);
+            list.push((short) (x0+1),y0);
+            list.push(x0, (short) (y0+1));
+            list.push(x0, (short) (y0-1));
 
             //Point point;
             rTotal += redOrig(x, y);
@@ -199,7 +200,7 @@ public class PolygonVectorizer extends BaseVectorizer {
             count++;
 
             startTime = System.currentTimeMillis();
-            int minX=x,maxX=x,minY=y,maxY=y;
+            short minX=x,maxX=x,minY=y,maxY=y;
             while(!list.isEmpty()){
                 if(canceled)return coloredPolygon;
                 x0 = list.getLastX();
@@ -230,13 +231,13 @@ public class PolygonVectorizer extends BaseVectorizer {
                         count++;
                     }
                     if(isWorkPixelNotVisited(x0,y0+1))
-                        list.push(x0,y0+1);
+                        list.push(x0, (short) (y0+1));
                     if(isWorkPixelNotVisited(x0+1,y0))
-                        list.push(x0+1,y0);
+                        list.push((short) (x0+1),y0);
                     if(isWorkPixelNotVisited(x0-1,y0))
-                        list.push(x0-1,y0);
+                        list.push((short) (x0-1),y0);
                     if(isWorkPixelNotVisited(x0,y0-1))
-                        list.push(x0,y0-1);
+                        list.push(x0, (short) (y0-1));
                 }
             }
             endTime = System.currentTimeMillis();
@@ -256,8 +257,8 @@ public class PolygonVectorizer extends BaseVectorizer {
                     {
                         x = x0;
                         y = y0;
-                        x0 = maxX+1;
-                        y0 = maxY+1;
+                        x0 = (short) (maxX+1);
+                        y0 = (short) (maxY+1);
                     }
 
             list.push(x,y);
@@ -270,8 +271,8 @@ public class PolygonVectorizer extends BaseVectorizer {
                 x1 = list.getLastX();
                 y1 = list.getLastY();
                 for(dir2=dir;dir2<8+dir;dir2++){
-                    x0 = x1 + DIR_X[dir2%8];
-                    y0 = y1 + DIR_Y[dir2%8];
+                    x0 = (short) (x1 + DIR_X[dir2%8]);
+                    y0 = (short) (y1 + DIR_Y[dir2%8]);
                     if(x0<0 || x0>=w || y0<0 || y0>=h)continue;
                     if(y0==y && x0==x) {
                         done = true;
