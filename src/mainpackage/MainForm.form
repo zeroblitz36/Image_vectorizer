@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="mainpackage.MainForm">
   <grid id="27dc6" binding="mainPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
     <constraints>
-      <xy x="20" y="20" width="500" height="400"/>
+      <xy x="20" y="20" width="690" height="547"/>
     </constraints>
     <properties>
       <preferredSize width="800" height="600"/>
@@ -38,6 +38,18 @@
             <constraints/>
             <properties>
               <text value="Load"/>
+            </properties>
+          </component>
+          <component id="7b23c" class="javax.swing.JButton" binding="btnStart">
+            <constraints/>
+            <properties>
+              <text value="Start"/>
+            </properties>
+          </component>
+          <component id="f217" class="javax.swing.JButton" binding="btnExport">
+            <constraints/>
+            <properties>
+              <text value="Export"/>
             </properties>
           </component>
           <component id="c79e2" class="javax.swing.JSlider" binding="slider1" default-binding="true">

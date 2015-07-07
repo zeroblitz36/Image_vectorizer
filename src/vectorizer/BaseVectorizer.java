@@ -3,6 +3,8 @@ package vectorizer;
 import utils.ImagePanel;
 
 import java.awt.image.BufferedImage;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 
 public abstract class BaseVectorizer {
     protected BufferedImage originalImage;
@@ -17,8 +19,16 @@ public abstract class BaseVectorizer {
     protected JobThread lastJob;
     protected final Object jobLock=new Object();
 
+    protected final static byte NONE_TYPE = 0;
+    protected final static byte SQUARE_TYPE = 1;
+    protected final static byte TRIANGLE_TYPE = 2;
+    protected final static byte POLYGON_TYPE = 3;
+
     public abstract void startJob();
     public abstract void cancelLastJob();
+
+    public abstract void exportToOutputStream(DataOutputStream os);
+    public abstract void importFromInputStream(DataInputStream is);
 
     public float interpolate(float a, float b,float x){
         return a + x*(b-a);

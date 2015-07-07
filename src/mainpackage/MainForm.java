@@ -8,6 +8,8 @@ import vectorizer.TriangleVectorizer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -23,6 +25,8 @@ public class MainForm {
     private JSlider slider1;
     private JButton chooseFileButton;
     private JComboBox<String> cbVectorizerTechnique;
+    private JButton btnStart;
+    private JButton btnExport;
 
     File mainImageFile = new File("photo3.bmp");
 
@@ -58,16 +62,6 @@ public class MainForm {
                 err.printStackTrace();
             }
         }).start());
-        slider1.addChangeListener(e -> {
-            int x = slider1.getValue();
-            if (x != lastSliderValue) {
-                lastSliderValue = x;
-                if(currentVectorizer!=null) {
-                    currentVectorizer.threshold = x;
-                    currentVectorizer.startJob();
-                }
-            }
-        });
 
         chooseFileButton.addActionListener(e -> {
             final JFileChooser fc = new JFileChooser();
@@ -90,10 +84,6 @@ public class MainForm {
                 }else{
                     vect.setOriginalImage(mainBufferedImage);
                     vect.setDestImagePanel(imagePanel21);
-                    if(slider1.getValue()!=vect.threshold){
-                        vect.threshold = slider1.getValue();
-                        vect.startJob();
-                    }
                     currentVectorizer = vect;
                 }
             }else if(e.getStateChange()==ItemEvent.DESELECTED){
@@ -101,6 +91,22 @@ public class MainForm {
                 if(vect!=null){
                     vect.cancelLastJob();
                 }
+            }
+        });
+        btnStart.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentVectorizer!=null) {
+                    int x = slider1.getValue();
+                    currentVectorizer.threshold = x;
+                    currentVectorizer.startJob();
+                }
+            }
+        });
+        btnExport.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
             }
         });
     }

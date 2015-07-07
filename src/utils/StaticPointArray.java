@@ -10,7 +10,6 @@ public class StaticPointArray {
         this.size = size;
         pointArrayX = new int[size];
         pointArrayY = new int[size];
-        count++;
     }
 
     public void push(int x,int y){
@@ -62,5 +61,13 @@ public class StaticPointArray {
     public void setXY(int i,int x,int y){
         pointArrayX[i] = x;
         pointArrayY[i] = y;
+    }
+
+    public StaticPointArray cloneUpTo(int s){
+        StaticPointArray spa = new StaticPointArray(s);
+        for(int i=0;i<s && i<count;i++){
+            spa.push(pointArrayX[i],pointArrayY[i]);
+        }
+        return spa;
     }
 }

@@ -5,11 +5,17 @@ import utils.ImagePanel;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class TriangleVectorizer extends BaseVectorizer{
+
     private Random random = new Random(System.currentTimeMillis());
+    private ArrayList<Triangle> lastSavedTriangleList = null;
 
     public void setDestImagePanel(ImagePanel p){
         destImagePanel = p;
@@ -42,6 +48,17 @@ public class TriangleVectorizer extends BaseVectorizer{
         }
     }
 
+    private void drawTriangles(ArrayList<Triangle> list){
+        if(destImagePanel!=null){
+            Graphics2D g = destImage.createGraphics();
+            for(Triangle t:list){
+                g.setColor(new Color(t.color));
+                g.fill(t.getClonePath());
+            }
+            destImagePanel.setImage(destImage);
+        }
+    }
+
     private class Job extends JobThread{
         private ArrayList<Triangle> triangles = new ArrayList<>();
         private final Object triangleLock = new Object();
@@ -71,15 +88,8 @@ public class TriangleVectorizer extends BaseVectorizer{
             }
 
             if(canceled)return;
-            if(destImagePanel!=null){
-                Graphics2D g = destImage.createGraphics();
-                for(Triangle t:triangles){
-                    g.setColor(new Color(t.color));
-                    g.fill(t.getClonePath());
-                }
-
-                destImagePanel.setImage(destImage);
-            }
+            drawTriangles(triangles);
+            lastSavedTriangleList = triangles;
         }
 
         public void recTriangulation(Triangle triangle){
@@ -204,6 +214,45 @@ public class TriangleVectorizer extends BaseVectorizer{
                 if(t1.area>0.5)recTriangulation(t1);
                 if(t2.area>0.5)recTriangulation(t2);
             }
+        }
+    }
+
+    public void exportToOutputStream(DataOutputStream os) {
+        try {
+            os.writeByte(SQUARE_TYPE);
+            os.writeInt(lastSavedTriangleList.size());
+            for(Triangle t : lastSavedTriangleList){
+                os.writeFloat(t.x0);
+                os.writeFloat(t.y0);
+                os.writeFloat(t.x1);
+                os.writeFloat(t.y1);
+                os.writeFloat(t.x2);
+                os.writeFloat(t.y2);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void importFromInputStream(DataInputStream is) {
+        try {
+            byte type = is.readByte();
+            if(type!=SQUARE_TYPE)throw new RuntimeException("Incorrect vectorizer");
+            int count = is.readInt();
+            ArrayList<Triangle> list = new ArrayList<>(count);
+            float x0, y0, x1, y1, x2, y2;
+            for (int i = 0; i < count; i++) {
+                x0 = is.readFloat();
+                y0 = is.readFloat();
+                x1 = is.readFloat();
+                y1 = is.readFloat();
+                x2 = is.readFloat();
+                y2 = is.readFloat();
+                list.add(new Triangle(x0, y0, x1, y1, x2, y2));
+            }
+            lastSavedTriangleList = list;
+            drawTriangles(lastSavedTriangleList);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

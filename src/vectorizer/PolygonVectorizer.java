@@ -1,20 +1,21 @@
 package vectorizer;
 
 import utils.ColoredPolygon;
-import utils.ImagePanel;
 import utils.StaticPointArray;
 import utils.Utility;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.Array;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 
 public class PolygonVectorizer extends BaseVectorizer {
     private StaticPointArray list;
+
+    private ArrayList<ColoredPolygon> lastSavedPolygonList;
 
     public void setOriginalImage(BufferedImage image){
         super.setOriginalImage(image);
@@ -23,6 +24,30 @@ public class PolygonVectorizer extends BaseVectorizer {
     private static final int DIR_X[] = new int[]{1,1,0,-1,-1,-1,0,1};
     private static final int DIR_Y[] = new int[]{0,1,1,1,0,-1,-1,-1};
 
+
+    private void drawFunctionSequentcial(ArrayList<ColoredPolygon> coloredPolygonList){
+        if(destImagePanel==null)return;
+        Graphics2D g = destImage.createGraphics();
+        g.setStroke(new BasicStroke(0.5f));
+        for (ColoredPolygon c : coloredPolygonList) {
+            g.setColor(new Color(c.color));
+            g.fill(c.getPath());
+        }
+        destImagePanel.setImage(destImage);
+    }
+    private void drawFunction(ArrayList<ColoredPolygon> coloredPolygonList){
+        if(destImagePanel!=null) {
+            Graphics2D g = destImage.createGraphics();
+            g.setColor(Color.WHITE);
+            g.fillRect(0,0,w-1,h-1);
+            g.setStroke(new BasicStroke(0.5f));
+            for (ColoredPolygon c : coloredPolygonList) {
+                g.setColor(new Color(c.color));
+                g.fill(c.getPath());
+            }
+            destImagePanel.setImage(destImage);
+        }
+    }
     private class Job extends JobThread{
         /*
         0 = unvisited
@@ -49,7 +74,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                     for (ColoredPolygon c : coloredPolygons) {
                         if (canceled) return;
                         g.setColor(new Color(c.color));
-                        g.fill(c.path);
+                        g.fill(c.getPath());
                     }
                 }else {
                     for (int pixel = 0; pixel < h * w; pixel++) {
@@ -77,17 +102,6 @@ public class PolygonVectorizer extends BaseVectorizer {
                 }
                 destImagePanel.setImage(destImage);
             }
-        }
-        private void drawFunction(ArrayList<ColoredPolygon> coloredPolygonList){
-            if(destImagePanel==null)return;
-            Graphics2D g = destImage.createGraphics();
-            g.setStroke(new BasicStroke(0.5f));
-            for (ColoredPolygon c : coloredPolygonList) {
-                if (canceled) return;
-                g.setColor(new Color(c.color));
-                g.fill(c.path);
-            }
-            destImagePanel.setImage(destImage);
         }
         @Override
         public void run() {
@@ -118,16 +132,16 @@ public class PolygonVectorizer extends BaseVectorizer {
                 if(System.currentTimeMillis()-timeOfLastUpdate>16 && flag)
                 {
                     timeOfLastUpdate = System.currentTimeMillis();
-                    drawFunction(localList);
+                    drawFunctionSequentcial(localList);
                     coloredPolygons.addAll(localList);
                     localList.clear();
                 }
             }
             if(localList.size()>0) {
-                drawFunction(localList);
+                drawFunctionSequentcial(localList);
                 coloredPolygons.addAll(localList);
             }
-
+            lastSavedPolygonList = coloredPolygons;
 
             System.out.format("workMatrixResetTime = %d\n" +
                             "coverSearchTime = %d\n" +
@@ -289,17 +303,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                 if(done)break;
             }while(!done);
 
-            if(notDebug) {
-                if(list.size()>0) {
-                    path.moveTo(list.getX(0), list.getY(0));
-                    for (int i = 1; i < list.size(); i++) {
-                        if (canceled) return coloredPolygon;
-                        path.lineTo(list.getX(i), list.getY(i));
-                    }
-                    path.lineTo(list.getX(0), list.getY(0));
-                }
-            }
-            endTime = System.currentTimeMillis();
+            coloredPolygon.pointArray = list.cloneUpTo(list.size());
 
             perimeterSearchTime += endTime-startTime;
 
@@ -317,7 +321,6 @@ public class PolygonVectorizer extends BaseVectorizer {
             endTime = System.currentTimeMillis();
             workMatrixTransferTime += endTime-startTime;
 
-            coloredPolygon.path = path;
             coloredPolygon.color = averageColor;
 
 
@@ -349,6 +352,54 @@ public class PolygonVectorizer extends BaseVectorizer {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    public void exportToOutputStream(DataOutputStream os){
+        try{
+            os.writeByte(POLYGON_TYPE);
+            os.writeInt(lastSavedPolygonList.size());
+            int size;
+            for(ColoredPolygon c : lastSavedPolygonList){
+                os.writeInt(c.color);
+                size = c.pointArray.size();
+                os.writeInt(size);
+                for(int i=0;i<size;i++){
+                    os.writeInt(c.pointArray.getX(i));
+                    os.writeInt(c.pointArray.getY(i));
+                }
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+    public void importFromInputStream(DataInputStream is){
+        try{
+            byte type = is.readByte();
+            if(type!=POLYGON_TYPE)throw new RuntimeException("Incorrect vectorizer");
+            int count = is.readInt();
+            ArrayList<ColoredPolygon> list = new ArrayList<>(count);
+            int x,y;
+            int size;
+            int color;
+            for(int i = 0;i < count;i++){
+                color = is.readInt();
+                size = is.readInt();
+                StaticPointArray spa = new StaticPointArray(size);
+                for(int j=0;j<size;j++){
+                    x = is.readInt();
+                    y = is.readInt();
+                    spa.push(x,y);
+                }
+                ColoredPolygon p = new ColoredPolygon();
+                p.pointArray = spa;
+                p.color = color;
+                list.add(p);
+            }
+            lastSavedPolygonList = list;
+            drawFunction(lastSavedPolygonList);
+        }catch (IOException e){
+            e.printStackTrace();
         }
     }
 

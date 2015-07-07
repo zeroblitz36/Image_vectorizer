@@ -2,6 +2,7 @@ package mainpackage;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
+import java.io.DataOutputStream;
 
 public class Triangle {
     public float x0,y0;
