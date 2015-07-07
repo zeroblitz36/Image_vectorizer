@@ -43,6 +43,19 @@ public class SquareVectorizer extends BaseVectorizer{
             }
         }
     }
+
+    public void drawFunction(ArrayList<SquareFragment> list){
+        if(destImage!=null) {
+            BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
+            Graphics2D g = image.createGraphics();
+            for (SquareFragment s : list) {
+                g.setColor(new Color(s.color));
+                g.fillRect(s.l, s.t, s.r - s.l + 1, s.d - s.t + 1);
+            }
+            destImagePanel.setImage(image);
+        }
+    }
+
     private class Job extends JobThread{
         private ArrayList<SquareFragment> fragList = new ArrayList<>();
         @Override
@@ -52,9 +65,7 @@ public class SquareVectorizer extends BaseVectorizer{
             int h = originalImage.getHeight();
             SquareFragment squareFragment = new SquareFragment(0, w - 1, 0, h - 1, -1);
             startTime = System.currentTimeMillis();
-            //recFragCheck(squareFragment);
             splitRecFragCheck(squareFragment);
-            //executorService.shutdown();
             endTime = System.currentTimeMillis();
             lastSavedSquareList = fragList;
             if (canceled) return;
@@ -195,7 +206,10 @@ public class SquareVectorizer extends BaseVectorizer{
                 r = is.readInt();
                 t = is.readInt();
                 d = is.readInt();
+                list.add(new SquareFragment(l,r,t,d,color));
             }
+            lastSavedSquareList = list;
+            drawFunction(lastSavedSquareList);
         }catch (IOException e){
             e.printStackTrace();
         }
