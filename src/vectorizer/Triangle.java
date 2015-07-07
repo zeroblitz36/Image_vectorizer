@@ -3,16 +3,17 @@ package vectorizer;
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.io.DataOutputStream;
+import java.io.Serializable;
 
-public class Triangle {
+public class Triangle implements Serializable{
     public float x0,y0;
     public float x1,y1;
     public float x2,y2;
-    public float yMin,yMax;
-    public float xMin,xMax;
     public int color;
-    public float area;
-    private Path2D.Float path;
+    public transient float yMin,yMax;
+    public transient float xMin,xMax;
+    public transient float area;
+    private transient Path2D.Float path;
     public Triangle(float x0, float y0, float x1, float y1, float x2, float y2) {
         this.x0 = x0;
         this.y0 = y0;

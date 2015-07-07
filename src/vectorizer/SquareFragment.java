@@ -1,9 +1,11 @@
 package vectorizer;
 
+import java.io.Serializable;
+
 /**
  * Created by Zero on 07.07.2015.
  */
-public class SquareFragment {
+public class SquareFragment implements Serializable {
     public int l, r, t, d, color;
 
     public SquareFragment(int l, int r, int t, int d, int color) {

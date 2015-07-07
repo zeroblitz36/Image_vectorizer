@@ -3,12 +3,13 @@ package vectorizer;
 import utils.StaticPointArray;
 
 import java.awt.geom.Path2D;
+import java.io.Serializable;
 
 /**
  * Created by GeorgeRoscaneanu on 28.04.2015.
  */
-public class ColoredPolygon {
-    private Path2D.Float path;
+public class ColoredPolygon implements Serializable{
+    private transient Path2D.Float path;
     public int color;
     public StaticPointArray pointArray;
 

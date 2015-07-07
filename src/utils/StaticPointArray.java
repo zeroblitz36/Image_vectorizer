@@ -1,6 +1,8 @@
 package utils;
 
-public class StaticPointArray {
+import java.io.Serializable;
+
+public class StaticPointArray implements Serializable{
     private int[] pointArrayX;
     private int[] pointArrayY;
     private int count;
