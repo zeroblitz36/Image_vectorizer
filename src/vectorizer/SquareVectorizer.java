@@ -1,15 +1,19 @@
 package vectorizer;
 
+import utils.ProtoBitSet;
 import utils.Utility;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class SquareVectorizer extends BaseVectorizer{
     private ArrayList<SquareFragment> lastSavedSquareList;
+    private ArrayList<SquareTree> lastSavedSquareTreeList;
+    private ProtoBitSet lastBitSet;
     private final Object fragListLock = new Object();
     private Random random = new Random(System.currentTimeMillis());
     long startTime, endTime;
@@ -56,14 +60,17 @@ public class SquareVectorizer extends BaseVectorizer{
 
     private class Job extends JobThread{
         private ArrayList<SquareFragment> fragList = new ArrayList<>();
+        private ArrayList<SquareTree> squareTreeList = new ArrayList<>();
         @Override
         public void run() {
             if (originalImage == null || canceled) return;
             SquareFragment squareFragment = new SquareFragment((short)0,(short) (w - 1),(short) 0, (short)(h - 1), -1);
             startTime = System.currentTimeMillis();
-            splitRecFragCheck(squareFragment);
+            recFragCheck(squareFragment);
+            //splitRecFragCheck(squareFragment);
             endTime = System.currentTimeMillis();
             lastSavedSquareList = fragList;
+            lastSavedSquareTreeList = squareTreeList;
             if (canceled) return;
             startTime = System.currentTimeMillis();
             BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
@@ -125,10 +132,11 @@ public class SquareVectorizer extends BaseVectorizer{
                 synchronized (fragListLock) {
                     fragList.add(s);
                 }
+                squareTreeList.add(new SquareTree(s.color,-1,-1));
             } else {
                 short midX = (short) (s.l + (random.nextFloat() / 2 + 0.25f) * (s.r - s.l));
                 short midY = (short) (s.t + (random.nextFloat() / 2 + 0.25f) * (s.d - s.t));
-
+                squareTreeList.add(new SquareTree(-1,midX,midY));
                 SquareFragment s1 = new SquareFragment(s.l, midX, s.t, midY, -1);
                 SquareFragment s2 = new SquareFragment((short) (midX + 1), s.r, s.t, midY, -1);
                 SquareFragment s3 = new SquareFragment(s.l, midX, (short) (midY + 1), s.d, -1);
@@ -175,14 +183,42 @@ public class SquareVectorizer extends BaseVectorizer{
 
     public void exportToOutputStream(OutputStream os) {
         try {
-            ObjectOutput oo = new ObjectOutputStream(os);
-            System.out.format("Estimated file size = %d B\n",lastSavedSquareList.size()*(12));
-            oo.writeObject(lastSavedSquareList);
+            prepareProtoBitSet();
+            //ObjectOutput oo = new ObjectOutputStream(os);
+            //System.out.format("Estimated file size = %d B\n",lastSavedSquareList.size()*(12));
+            os.write(lastBitSet.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
+    public void prepareProtoBitSet(){
+        byte coordDataSize = 0;
+        int max = w>h?w:h;
+        while(max!=0){
+            max>>=1;
+            coordDataSize++;
+        }
+        ProtoBitSet pbs = new ProtoBitSet();
+        //coordinate data size
+        pbs.push(coordDataSize,8);
+        //width and height
+        pbs.push(w,coordDataSize);
+        pbs.push(h,coordDataSize);
+        //push all square trees
+        for(SquareTree st : lastSavedSquareTreeList){
+            //System.out.format("BitSet size = %d\n",pbs.currentLength);
+            if(st.midX!=-1){
+                pbs.push(1,1);
+                pbs.push(st.midX,coordDataSize);
+                pbs.push(st.minY,coordDataSize);
+            }else{
+                pbs.push(0,1);
+                pbs.push(st.color,32);
+            }
+        }
+        System.out.format("BitSet size = %d\n",pbs.currentLength);
+        lastBitSet = pbs;
+    }
     public void importFromInputStream(InputStream is) {
         try{
             ObjectInput oi = new ObjectInputStream(is);
