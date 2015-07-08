@@ -7,7 +7,7 @@ import java.util.BitSet;
  */
 public class ProtoBitSet extends BitSet {
     private int readCounter;
-    public int currentLength=0;
+    public int currentLength=32;
     public void push(long x,int q){
         q = Math.min(64, q);
         switch (q){
@@ -154,6 +154,63 @@ public class ProtoBitSet extends BitSet {
             case 1: set(currentLength++,(x&1)==1);x>>=1;
             default:
                 break;
+        }
+    }
+
+    public void resetReadCounter(){
+        readCounter = 0;
+    }
+    public void resetWriteCounter(){
+        currentLength = 32;
+    }
+    public boolean readBoolean(){
+        return get(readCounter++);
+    }
+    public byte readByte(int q){
+        q = Math.min(8,q);
+        byte x=0;
+        for(int i=0;i<q;i++){
+            if(get(readCounter++)){
+                x|=1<<i;
+            }
+        }
+        return x;
+    }
+    public short readShort(int q){
+        q = Math.min(16,q);
+        short x=0;
+        for(int i=0;i<q;i++){
+            if(get(readCounter++)){
+                x|=1<<i;
+            }
+        }
+        return x;
+    }
+    public int readInt(int q){
+        q = Math.min(32,q);
+        int x=0;
+        for(int i=0;i<q;i++){
+            if(get(readCounter++)){
+                x|=1<<i;
+            }
+        }
+        return x;
+    }
+    public long readLong(int q){
+        q = Math.min(64,q);
+        long x=0;
+        for(int i=0;i<q;i++){
+            if(get(readCounter++)){
+                x|=1<<i;
+            }
+        }
+        return x;
+    }
+    public void writeSize(){
+        int s = currentLength-32;
+        for(int i=0;i<32;i++){
+            set(i,(s&1)==1);
+            s>>=1;
         }
     }
 }

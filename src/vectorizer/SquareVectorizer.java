@@ -184,8 +184,6 @@ public class SquareVectorizer extends BaseVectorizer{
     public void exportToOutputStream(OutputStream os) {
         try {
             prepareProtoBitSet();
-            //ObjectOutput oo = new ObjectOutputStream(os);
-            //System.out.format("Estimated file size = %d B\n",lastSavedSquareList.size()*(12));
             os.write(lastBitSet.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();
@@ -216,6 +214,8 @@ public class SquareVectorizer extends BaseVectorizer{
                 pbs.push(st.color,32);
             }
         }
+        //write the size
+        pbs.writeSize();
         System.out.format("BitSet size = %d\n",pbs.currentLength);
         lastBitSet = pbs;
     }
