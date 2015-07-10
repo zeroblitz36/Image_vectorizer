@@ -180,15 +180,6 @@ public class SquareVectorizer extends BaseVectorizer{
             }
         }
     }
-
-    public void exportToOutputStream(OutputStream os) {
-        try {
-            prepareProtoBitSet();
-            os.write(lastBitSet.toByteArray());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     public void prepareProtoBitSet(){
         byte coordDataSize = 0;
         int max = w>h?w:h;
@@ -197,11 +188,12 @@ public class SquareVectorizer extends BaseVectorizer{
             coordDataSize++;
         }
         ProtoBitSet pbs = new ProtoBitSet();
+        pbs.resetWriteCounter();
         //coordinate data size
         pbs.push(coordDataSize,8);
         //width and height
         pbs.push(w,coordDataSize);
-        pbs.push(h,coordDataSize);
+        pbs.push(h, coordDataSize);
         //push all square trees
         for(SquareTree st : lastSavedSquareTreeList){
             //System.out.format("BitSet size = %d\n",pbs.currentLength);
@@ -219,15 +211,55 @@ public class SquareVectorizer extends BaseVectorizer{
         System.out.format("BitSet size = %d\n",pbs.currentLength);
         lastBitSet = pbs;
     }
+    private void decodeBitSet(ProtoBitSet pbs){
+        pbs.resetReadCounter();
+        //coordinate data size
+        byte coordDataSize = pbs.readByte(8);
+        //width and height
+        short w = pbs.readShort(coordDataSize);
+        short h = pbs.readShort(coordDataSize);
+        //get all square trees
+        int size = pbs.getSize();
+        ArrayList<SquareTree> list = new ArrayList<>();
+        while(pbs.getReadCounter()<size){
+            list.add(decodeSquareTrees(pbs,coordDataSize));
+        }
+        lastSavedSquareTreeList = list;
+    }
+    private SquareTree decodeSquareTrees(ProtoBitSet pbs,int dataSize){
+        //if its true then it contains further child nodes
+        if(pbs.readBoolean()){
+            return new SquareTree(0,pbs.readInt(dataSize),pbs.readInt(dataSize));
+        }
+        //if its false then this square tree is a child
+        else{
+            return new SquareTree(pbs.readInt(32),-1,-1);
+        }
+    }
+    public void exportToOutputStream(OutputStream os) {
+        try {
+            prepareProtoBitSet();
+            os.write(lastBitSet.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void importFromInputStream(InputStream is) {
         try{
-            ObjectInput oi = new ObjectInputStream(is);
-            ArrayList<SquareFragment> list = (ArrayList<SquareFragment>) oi.readObject();
-            lastSavedSquareList = list;
+            //ObjectInput oi = new ObjectInputStream(is);
+            //ArrayList<SquareFragment> list = (ArrayList<SquareFragment>) oi.readObject();
+            //lastSavedSquareList = list;
+            ProtoBitSet pbs = new ProtoBitSet();
+            byte[] buffer = new byte[1000];
+            int l;
+            while((l=is.read(buffer))!=-1){
+                for(int i=0;i<l;i++)
+                    pbs.push(buffer[i],8);
+            }
+
             drawFunction(lastSavedSquareList);
         }catch (IOException e){
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

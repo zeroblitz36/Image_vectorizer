@@ -8,6 +8,12 @@ import java.util.BitSet;
 public class ProtoBitSet extends BitSet {
     private int readCounter;
     public int currentLength=32;
+
+    public ProtoBitSet() {
+        resetReadCounter();
+        resetWriteCounter();
+    }
+
     public void push(long x,int q){
         q = Math.min(64, q);
         switch (q){
@@ -158,7 +164,7 @@ public class ProtoBitSet extends BitSet {
     }
 
     public void resetReadCounter(){
-        readCounter = 0;
+        readCounter = 32;
     }
     public void resetWriteCounter(){
         currentLength = 32;
@@ -212,5 +218,22 @@ public class ProtoBitSet extends BitSet {
             set(i,(s&1)==1);
             s>>=1;
         }
+    }
+    public int getSize(){
+        int s = 0;
+        for(int i=0;i<32;i++){
+            if(get(i)){
+                s|=1<<i;
+            }
+        }
+        return s;
+    }
+
+    public int getReadCounter() {
+        return readCounter;
+    }
+
+    public int getCurrentLength() {
+        return currentLength;
     }
 }
