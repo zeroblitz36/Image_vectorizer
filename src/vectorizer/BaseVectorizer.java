@@ -32,6 +32,7 @@ public abstract class BaseVectorizer {
 
     public abstract void exportToOutputStream(OutputStream os);
     public abstract void importFromInputStream(InputStream is);
+    public abstract void exportToSVG(OutputStream os);
 
     public float interpolate(float a, float b,float x){
         return a + x*(b-a);

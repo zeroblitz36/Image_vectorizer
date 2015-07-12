@@ -118,7 +118,12 @@ public class MainForm {
                                     FileOutputStream fos = new FileOutputStream(file);
                                     DataOutputStream dos = new DataOutputStream(fos);
                                     System.out.println("Exporting to output stream");
-                                    currentVectorizer.exportToOutputStream(dos);
+                                    String fileName = file.getName();
+                                    if(fileName.endsWith(".html")){
+                                        currentVectorizer.exportToSVG(dos);
+                                    }else {
+                                        currentVectorizer.exportToOutputStream(dos);
+                                    }
                                     System.out.println("Exporting done");
                                     dos.close();
                                 } catch (FileNotFoundException e1) {

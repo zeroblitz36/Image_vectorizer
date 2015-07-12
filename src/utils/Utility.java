@@ -1,5 +1,8 @@
 package utils;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * Created by GeorgeRoscaneanu on 17.04.2015.
  */
@@ -44,5 +47,7 @@ public class Utility {
         return a-b;
     }
 
-
+    public static void writeTo(String s,OutputStream os) throws IOException {
+        os.write(s.getBytes());
+    }
 }

@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Random;
 
 public class SquareVectorizer extends BaseVectorizer{
@@ -211,6 +212,10 @@ public class SquareVectorizer extends BaseVectorizer{
         System.out.format("BitSet size = %d\n",pbs.currentLength);
         lastBitSet = pbs;
     }
+
+    public void decodeSquareTreeArray(ArrayList<SquareTree> list){
+
+    }
     private void decodeBitSet(ProtoBitSet pbs){
         pbs.resetReadCounter();
         //coordinate data size
@@ -260,6 +265,33 @@ public class SquareVectorizer extends BaseVectorizer{
 
             drawFunction(lastSavedSquareList);
         }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void exportToSVG(OutputStream os) {
+        BufferedOutputStream bos = new BufferedOutputStream(os);
+        Locale.setDefault(Locale.US);
+        try {
+            Utility.writeTo("<!DOCTYPE html>\n<html>\n<body>\n", bos);
+            Utility.writeTo(String.format("<svg width='%d' height='%d'>\n", w, h), bos);
+            for(SquareFragment sf : lastSavedSquareList){
+                Utility.writeTo(String.format("<rect x='%f' y='%f' width='%f' height='%f' style='fill:#%06X'/>\n",
+                        sf.l-0.5,
+                        sf.t-0.5,
+                        sf.r-sf.l+1.5,
+                        sf.d-sf.t+1.5
+                        ,sf.color&0xffffff),bos);
+            }
+            Utility.writeTo("</svg>\n</body>\n</html>",bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            bos.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

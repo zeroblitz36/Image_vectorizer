@@ -374,4 +374,8 @@ public class PolygonVectorizer extends BaseVectorizer {
         }
     }
 
+    @Override
+    public void exportToSVG(OutputStream os) {
+
+    }
 }

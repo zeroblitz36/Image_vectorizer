@@ -232,4 +232,9 @@ public class TriangleVectorizer extends BaseVectorizer{
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void exportToSVG(OutputStream os) {
+
+    }
 }
