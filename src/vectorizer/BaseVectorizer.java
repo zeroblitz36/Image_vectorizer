@@ -79,6 +79,15 @@ public abstract class BaseVectorizer {
     }
 
     public void setOriginalImage(BufferedImage image){
+        if(image == null){
+            cancelLastJob();
+            originalImage = null;
+            w = -1;
+            h = -1;
+            area = -1;
+            destImage = null;
+            return;
+        }
         if(originalImage==null || image!=originalImage) {
             cancelLastJob();
             originalImage = image;

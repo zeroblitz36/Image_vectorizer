@@ -57,6 +57,7 @@ public class MainForm {
 
                 imagePanel21.setImage(mainBufferedImage);
 
+                updateCurrentVectorizer();
             } catch (IOException err) {
                 err.printStackTrace();
             }
@@ -71,7 +72,7 @@ public class MainForm {
             }
         });
         cbVectorizerTechnique.addItemListener(e -> {
-            String s = e.getItem().toString();
+            /*String s = e.getItem().toString();
 
             BaseVectorizer vect = indexHashMap.get(s);
 
@@ -90,8 +91,11 @@ public class MainForm {
                 if (vect != null) {
                     vect.cancelLastJob();
                 }
-            }
+            }   */
+
+            updateCurrentVectorizer();
         });
+        updateCurrentVectorizer();
         btnStart.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -139,7 +143,22 @@ public class MainForm {
         });
     }
 
+    private void updateCurrentVectorizer(){
+        String s = cbVectorizerTechnique.getSelectedItem().toString();
 
+        BaseVectorizer vect = indexHashMap.get(s);
+        //if(currentVectorizer==vect) return;
+        if(currentVectorizer!=null){
+            currentVectorizer.cancelLastJob();
+        }
+        currentVectorizer = vect;
+        if(currentVectorizer==null){
+            imagePanel21.setImage(mainBufferedImage);
+        }else{
+            currentVectorizer.setOriginalImage(mainBufferedImage);
+            currentVectorizer.setDestImagePanel(imagePanel21);
+        }
+    }
 
 
 
