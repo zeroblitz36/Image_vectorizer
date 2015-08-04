@@ -1,10 +1,12 @@
 package vectorizer;
 
 import utils.ImagePanel;
+import utils.Utility;
 
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Random;
 
 public class TriangleVectorizer extends BaseVectorizer{
@@ -234,7 +236,31 @@ public class TriangleVectorizer extends BaseVectorizer{
     }
 
     @Override
-    public void exportToSVG(OutputStream os) {
+    public void exportToHTML(OutputStream os) {
 
+    }
+
+    @Override
+    public void exportToSVG(OutputStream os) {
+        BufferedOutputStream bos = new BufferedOutputStream(os);
+        Locale.setDefault(Locale.US);
+
+        try {
+            Utility.writeTo(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h), bos);
+            for(Triangle t : lastSavedTriangleList){
+                String s = String.format("<polyline points='%f,%f %f,%f %f,%f' style='fill:#%06X' />\n",
+                        t.x0,t.y0,t.x1,t.y1,t.x2,t.y2,t.color&0xffffff);
+                Utility.writeTo(s,bos);
+            }
+            Utility.writeTo("</svg>",bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try{
+            os.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }

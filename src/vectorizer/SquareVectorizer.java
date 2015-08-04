@@ -5,8 +5,10 @@ import utils.Utility;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.ByteBuffer;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
@@ -270,7 +272,7 @@ public class SquareVectorizer extends BaseVectorizer{
     }
 
     @Override
-    public void exportToSVG(OutputStream os) {
+    public void exportToHTML(OutputStream os) {
         BufferedOutputStream bos = new BufferedOutputStream(os);
         Locale.setDefault(Locale.US);
         try {
@@ -285,6 +287,32 @@ public class SquareVectorizer extends BaseVectorizer{
                         ,sf.color&0xffffff),bos);
             }
             Utility.writeTo("</svg>\n</body>\n</html>",bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void exportToSVG(OutputStream os) {
+        BufferedOutputStream bos = new BufferedOutputStream(os);
+        Locale.setDefault(Locale.US);
+        try {
+            Utility.writeTo(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h), bos);
+            for(SquareFragment sf : lastSavedSquareList){
+                Utility.writeTo(String.format("<rect x='%f' y='%f' width='%f' height='%f' style='fill:#%06X'/>\n",
+                        sf.l-0.5,
+                        sf.t-0.5,
+                        sf.r-sf.l+1.5,
+                        sf.d-sf.t+1.5
+                        ,sf.color&0xffffff),bos);
+            }
+            Utility.writeTo("</svg>",bos);
         } catch (IOException e) {
             e.printStackTrace();
         }

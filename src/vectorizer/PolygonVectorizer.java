@@ -8,6 +8,7 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class PolygonVectorizer extends BaseVectorizer {
     private StaticPointArray list;
@@ -375,7 +376,43 @@ public class PolygonVectorizer extends BaseVectorizer {
     }
 
     @Override
-    public void exportToSVG(OutputStream os) {
+    public void exportToHTML(OutputStream os) {
 
+    }
+
+    @Override
+    public void exportToSVG(OutputStream os) {
+        BufferedOutputStream bos = new BufferedOutputStream(os);
+        Locale.setDefault(Locale.US);
+        try {
+            Utility.writeTo(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h), bos);
+            /*for(SquareFragment sf : lastSavedSquareList){
+                Utility.writeTo(String.format("<rect x='%f' y='%f' width='%f' height='%f' style='fill:#%06X'/>\n",
+                        sf.l-0.5,
+                        sf.t-0.5,
+                        sf.r-sf.l+1.5,
+                        sf.d-sf.t+1.5
+                        ,sf.color&0xffffff),bos);
+            }*/
+            for(ColoredPolygon c : lastSavedPolygonList){
+                StaticPointArray spa = c.pointArray;
+                String points = "";
+                for(int i=0;i<spa.size();i++){
+                    points+=String.format("%d,%d ",spa.getX(i),spa.getY(i));
+                }
+                String s = String.format("<polyline points='%s'  style='fill:#%06X'/>\n",
+                        points,c.color&0xffffff);
+                Utility.writeTo(s,bos);
+            }
+            Utility.writeTo("</svg>",bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
