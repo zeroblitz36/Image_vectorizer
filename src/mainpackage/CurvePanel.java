@@ -1,6 +1,6 @@
 package mainpackage;
 
-import utils.StaticPointArray;
+import org.ejml.simple.SimpleMatrix;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 public class CurvePanel extends JPanel implements MouseMotionListener,MouseListener{
     ArrayList<Point2D.Float> D = new ArrayList<Point2D.Float>(64);
     ArrayList<Point2D.Float> P = new ArrayList<Point2D.Float>(64);
+    ArrayList<Point2D.Float> Qk = new ArrayList<Point2D.Float>(64);
     ArrayList<Point2D.Float> Q = new ArrayList<Point2D.Float>(64);
     float [][] N = new float[64][64];
     float [][] NTranspose = new float[64][64];
@@ -29,22 +30,50 @@ public class CurvePanel extends JPanel implements MouseMotionListener,MouseListe
         while(P.size()<h+1){
             P.add(new Point2D.Float());
         }
-        while(Q.size()<n+1){
+        while(Qk.size()<n+1){
+            Qk.add(new Point2D.Float());
+        }
+        while(Q.size()<h+1){
             Q.add(new Point2D.Float());
         }
-        P.get(0).setLocation(D.get(0).x,D.get(0).y);
-        P.get(h).setLocation(D.get(n).x,D.get(n).y);
+
+        P.get(0).setLocation(D.get(0).x, D.get(0).y);
+        P.get(h).setLocation(D.get(n).x, D.get(n).y);
 
         for(int k=1;k<=n-1;k++){
             float a = N(0,p,t[k]);
             float b = N(h,p,t[k]);
             float x = D.get(k).x-a*D.get(0).x-b*D.get(n).x;
             float y = D.get(k).y-a*D.get(0).y-b*D.get(n).y;
-            Q.get(k).setLocation(x,y);
+            Qk.get(k).setLocation(x,y);
         }
+
+        for(int i=1;i<=h-1;i++){
+            for(int k=1;k<n-1;k++){
+                float n = N(i,p,t[k]);
+                Q.get(i).setLocation(n*Qk.get(i).x,n*Qk.get(i).y);
+            }
+        }
+
         generateNArray();
 
+        //matrix solving
+        SimpleMatrix simpleMatrixM = new SimpleMatrix(h-1,h-1);
+        for(int i=1;i<=h-1;i++)
+            for(int j=1;j<=h-1;j++){
+                simpleMatrixM.set(i - 1, j - 1, M[i][j]);
+            }
 
+        SimpleMatrix simpleMatrixQ = new SimpleMatrix(h-1,2);
+        for(int i=1;i<h-1;i++){
+            simpleMatrixQ.set(i - 1, 0, Q.get(i).x);
+            simpleMatrixQ.set(i - 1, 1, Q.get(i).y);
+        }
+
+        SimpleMatrix simpleMatrixP = simpleMatrixM.solve(simpleMatrixQ);
+        for(int i=1;i<=h-1;i++){
+            P.get(i).setLocation(simpleMatrixP.get(i-1,0),simpleMatrixP.get(i-1,1));
+        }
     }
 
 
