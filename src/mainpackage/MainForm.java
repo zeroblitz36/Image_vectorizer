@@ -25,11 +25,12 @@ public class MainForm {
     private JComboBox<String> cbVectorizerTechnique;
     private JButton btnStart;
     private JButton btnExport;
+    private JButton curveEditorButton;
 
     File mainImageFile = new File("photo3.bmp");
 
     private BufferedImage mainBufferedImage;
-    private int lastSliderValue=-1;
+    //private int lastSliderValue=-1;
     private BaseVectorizer currentVectorizer = null;
 
     private HashMap<String, BaseVectorizer> indexHashMap = new HashMap<>(3);
@@ -63,7 +64,7 @@ public class MainForm {
         }).start());
 
         chooseFileButton.addActionListener(e -> {
-            final JFileChooser fc = new JFileChooser();
+            final JFileChooser fc = new JFileChooser("C:\\Vectorizer");
             fc.setDialogTitle("Choose image file");
             int returnedValue = fc.showOpenDialog(chooseFileButton);
             if (returnedValue == JFileChooser.APPROVE_OPTION) {
@@ -109,7 +110,8 @@ public class MainForm {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(currentVectorizer!=null){
-                    final JFileChooser fc = new JFileChooser();
+                    final JFileChooser fc = new JFileChooser("C:\\Vectorizer");
+
                     fc.setDialogTitle("Export vectorized image");
                     int returnedValue = fc.showSaveDialog(btnExport);
                     if(returnedValue == JFileChooser.APPROVE_OPTION){
@@ -140,6 +142,16 @@ public class MainForm {
                         }).start();
                     }
                 }
+            }
+        });
+        curveEditorButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame frame = new JFrame("Curve Editor");
+                frame.setContentPane(new BSplineEditor().mainPanel);
+                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                frame.setSize(640,480);
+                frame.setVisible(true);
             }
         });
     }

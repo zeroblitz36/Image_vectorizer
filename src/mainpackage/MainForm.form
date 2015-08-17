@@ -65,6 +65,12 @@
               <model/>
             </properties>
           </component>
+          <component id="edce3" class="javax.swing.JButton" binding="curveEditorButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="Curve Editor"/>
+            </properties>
+          </component>
         </children>
       </grid>
     </children>

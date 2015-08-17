@@ -4,6 +4,7 @@ import utils.ProtoBitSet;
 import utils.Utility;
 
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -305,12 +306,25 @@ public class SquareVectorizer extends BaseVectorizer{
         try {
             Utility.writeTo(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h), bos);
             for(SquareFragment sf : lastSavedSquareList){
-                Utility.writeTo(String.format("<rect x='%f' y='%f' width='%f' height='%f' style='fill:#%06X'/>\n",
+                /*Utility.writeTo(String.format("<rect x='%f' y='%f' width='%f' height='%f' style='fill:#%06X'/>\n",
                         sf.l-0.5,
                         sf.t-0.5,
                         sf.r-sf.l+1.5,
                         sf.d-sf.t+1.5
-                        ,sf.color&0xffffff),bos);
+                        ,sf.color&0xffffff),bos);*/
+                /*String s = String.format("<polygon points='%d %d %d %d' fill='#%06X'/>\n",
+                        sf.l,
+                        sf.t,
+                        sf.r-sf.l+2,
+                        sf.d-sf.t+2,
+                        sf.color&0xffffff);
+                Utility.writeTo(s,bos);*/
+                Utility.writeTo(String.format("<rect x='%d'y='%d'width='%d'height='%d'style='fill:#%06X'/>\n",
+                        sf.l,
+                        sf.t,
+                        sf.r-sf.l+2,
+                        sf.d-sf.t+2,
+                        sf.color&0xffffff),bos);
             }
             Utility.writeTo("</svg>",bos);
         } catch (IOException e) {
