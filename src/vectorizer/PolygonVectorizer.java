@@ -302,20 +302,26 @@ public class PolygonVectorizer extends BaseVectorizer {
                 if(done)break;
             }while(!done);
 
-
+            float comp = (float) Math.sqrt(2);
+            comp = 0.1f;
+            boolean flag = true;
             //list pruning
-            for(int i=0;i<list.size()-2;i++){
-                float xa = list.getX(i);
-                float ya = list.getY(i);
-                float xb = list.getX(i + 1);
-                float yb = list.getY(i + 1);
-                float xc = list.getX(i + 2);
-                float yc = list.getY(i + 2);
+            while(flag) {
+                flag = false;
+                for (int i = 0; i < list.size() - 2; i++) {
+                    float xa = list.getX(i);
+                    float ya = list.getY(i);
+                    float xb = list.getX(i + 1);
+                    float yb = list.getY(i + 1);
+                    float xc = list.getX(i + 2);
+                    float yc = list.getY(i + 2);
 
-                float dist = Utility.distanceFromPointToLine(xb,yb,xa,ya,xc,yc);
-                if(dist<0.001){
-                    list.delete(i+1);
-                    i--;
+                    float dist = Utility.distanceFromPointToLine(xb, yb, xa, ya, xc, yc);
+                    if (dist < comp) {
+                        list.delete(i + 1);
+                        i--;
+                        flag = true;
+                    }
                 }
             }
 
