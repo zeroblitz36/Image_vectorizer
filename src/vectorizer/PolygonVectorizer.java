@@ -302,6 +302,23 @@ public class PolygonVectorizer extends BaseVectorizer {
                 if(done)break;
             }while(!done);
 
+
+            //list pruning
+            for(int i=0;i<list.size()-2;i++){
+                float xa = list.getX(i);
+                float ya = list.getY(i);
+                float xb = list.getX(i + 1);
+                float yb = list.getY(i + 1);
+                float xc = list.getX(i + 2);
+                float yc = list.getY(i + 2);
+
+                float dist = Utility.distanceFromPointToLine(xb,yb,xa,ya,xc,yc);
+                if(dist<0.001){
+                    list.delete(i+1);
+                    i--;
+                }
+            }
+
             coloredPolygon.pointArray = list.cloneUpTo(list.size());
 
             perimeterSearchTime += endTime-startTime;

@@ -72,4 +72,15 @@ public class StaticPointArray implements Serializable{
         }
         return spa;
     }
+
+    public void delete(int i){
+        if(i<0 || i>= count)throw new RuntimeException("There is nothing to delete at "+i);
+        if(count == 0)throw new RuntimeException("The static point array is already empty");
+
+        for(int j=i;j<count-1;j++){
+            pointArrayX[j]=pointArrayX[j+1];
+            pointArrayY[j]=pointArrayY[j+1];
+        }
+        count--;
+    }
 }

@@ -50,4 +50,12 @@ public class Utility {
     public static void writeTo(String s,OutputStream os) throws IOException {
         os.write(s.getBytes());
     }
+
+    public static float distanceFromPointToLine(float x0,float y0,float x1,float y1,float x2,float y2){
+        float a = (y2-y1)*x0-(x2-x1)*y0+x2*y1-y2*x1;
+        a = Math.abs(a);
+        float b = (y2-y1)*(y2-y1)+(x2-x1)*(x2-x1);
+        b = (float) Math.sqrt(b);
+        return a/b;
+    }
 }
