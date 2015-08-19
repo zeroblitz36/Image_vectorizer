@@ -149,7 +149,7 @@ public class MainForm {
             public void actionPerformed(ActionEvent e) {
                 JFrame frame = new JFrame("Curve Editor");
                 frame.setContentPane(new BSplineEditor().mainPanel);
-                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                 frame.setSize(640,480);
                 frame.setVisible(true);
             }
