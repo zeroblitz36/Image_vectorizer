@@ -8,8 +8,11 @@ import vectorizer.TriangleVectorizer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -99,7 +102,7 @@ public class MainForm {
         btnStart.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(currentVectorizer!=null) {
+                if (currentVectorizer != null) {
                     int x = slider1.getValue();
                     currentVectorizer.threshold = x;
                     currentVectorizer.startJob();
@@ -152,6 +155,16 @@ public class MainForm {
                 frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                 frame.setSize(640,480);
                 frame.setVisible(true);
+            }
+        });
+        slider1.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if(currentVectorizer!=null) {
+                    int x = slider1.getValue();
+                    currentVectorizer.threshold = x;
+                    currentVectorizer.startJob();
+                }
             }
         });
     }

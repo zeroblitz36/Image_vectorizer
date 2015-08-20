@@ -45,10 +45,10 @@ public class PolygonVectorizer extends BaseVectorizer {
                 g.setColor(new Color(c.color));
                 g.fill(c.getPath());
             }
-            int size = 16;
+            int size = 32;
             Font myFont = new Font("Serif",Font.BOLD, size);
             g.setFont(myFont);
-            g.setColor(Color.PINK);
+            g.setColor(Color.RED);
             g.drawString("SVG: "+dataInSvgFormat.length() + " B",1,size+1);
             destImagePanel.setImage(destImage);
         }
@@ -66,6 +66,7 @@ public class PolygonVectorizer extends BaseVectorizer {
         private ArrayList<ColoredPolygon> coloredPolygons = new ArrayList<>(1000);
         private long startTime,endTime;
         private long workMatrixResetTime,coverSearchTime,perimeterSearchTime,workMatrixTransferTime;
+        private long exportSvgTime;
         /*
         private void drawFunction(){
             int x0,y0;
@@ -149,7 +150,9 @@ public class PolygonVectorizer extends BaseVectorizer {
             }
             lastSavedPolygonList = coloredPolygons;
 
+            exportSvgTime = System.currentTimeMillis();
             constructStringSVG();
+            exportSvgTime = System.currentTimeMillis()-exportSvgTime;
 
             drawFunction(lastSavedPolygonList);
 
@@ -157,11 +160,13 @@ public class PolygonVectorizer extends BaseVectorizer {
                             "coverSearchTime = %d\n" +
                             "perimeterSearchTime = %d\n" +
                             "workMatrixTransferTime = %d\n" +
+                            "exportSvgTime = %d\n" +
                             "-----------------------------------------\n",
                     workMatrixResetTime,
                     coverSearchTime,
                     perimeterSearchTime,
-                    workMatrixTransferTime);
+                    workMatrixTransferTime,
+                    exportSvgTime);
         }
 
         private char getWorkPixel(int x,int y){
