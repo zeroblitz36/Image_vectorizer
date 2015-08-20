@@ -15,6 +15,8 @@ public class PolygonVectorizer extends BaseVectorizer {
 
     private ArrayList<ColoredPolygon> lastSavedPolygonList;
 
+    private String dataInSvgFormat;
+
     public void setOriginalImage(BufferedImage image){
         super.setOriginalImage(image);
         list = new StaticPointArray(area);
@@ -37,12 +39,17 @@ public class PolygonVectorizer extends BaseVectorizer {
         if(destImagePanel!=null) {
             Graphics2D g = destImage.createGraphics();
             g.setColor(Color.WHITE);
-            g.fillRect(0,0,w-1,h-1);
+            g.fillRect(0, 0, w - 1, h - 1);
             g.setStroke(new BasicStroke(0.5f));
             for (ColoredPolygon c : coloredPolygonList) {
                 g.setColor(new Color(c.color));
                 g.fill(c.getPath());
             }
+            int size = 16;
+            Font myFont = new Font("Serif",Font.BOLD, size);
+            g.setFont(myFont);
+            g.setColor(Color.PINK);
+            g.drawString("SVG: "+dataInSvgFormat.length() + " B",1,size+1);
             destImagePanel.setImage(destImage);
         }
     }
@@ -59,7 +66,7 @@ public class PolygonVectorizer extends BaseVectorizer {
         private ArrayList<ColoredPolygon> coloredPolygons = new ArrayList<>(1000);
         private long startTime,endTime;
         private long workMatrixResetTime,coverSearchTime,perimeterSearchTime,workMatrixTransferTime;
-
+        /*
         private void drawFunction(){
             int x0,y0;
             if(destImagePanel!=null) {
@@ -100,7 +107,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                 }
                 destImagePanel.setImage(destImage);
             }
-        }
+        }*/
         @Override
         public void run() {
             workMatrixResetTime=0;
@@ -116,7 +123,7 @@ public class PolygonVectorizer extends BaseVectorizer {
             int pixel;
             boolean flag;
             long timeOfLastUpdate = System.currentTimeMillis();
-            drawFunction();
+            //drawFunction();
             for(y0=0;y0<h;y0++){
                 flag = false;
                 for(x0=0;x0<w;x0++){
@@ -141,6 +148,10 @@ public class PolygonVectorizer extends BaseVectorizer {
                 coloredPolygons.addAll(localList);
             }
             lastSavedPolygonList = coloredPolygons;
+
+            constructStringSVG();
+
+            drawFunction(lastSavedPolygonList);
 
             System.out.format("workMatrixResetTime = %d\n" +
                             "coverSearchTime = %d\n" +
@@ -406,17 +417,9 @@ public class PolygonVectorizer extends BaseVectorizer {
     @Override
     public void exportToSVG(OutputStream os) {
         BufferedOutputStream bos = new BufferedOutputStream(os);
-        Locale.setDefault(Locale.US);
+        /*Locale.setDefault(Locale.US);
         try {
             Utility.writeTo(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h), bos);
-            /*for(SquareFragment sf : lastSavedSquareList){
-                Utility.writeTo(String.format("<rect x='%f' y='%f' width='%f' height='%f' style='fill:#%06X'/>\n",
-                        sf.l-0.5,
-                        sf.t-0.5,
-                        sf.r-sf.l+1.5,
-                        sf.d-sf.t+1.5
-                        ,sf.color&0xffffff),bos);
-            }*/
             for(ColoredPolygon c : lastSavedPolygonList){
                 StaticPointArray spa = c.pointArray;
                 String points = "";
@@ -431,11 +434,38 @@ public class PolygonVectorizer extends BaseVectorizer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        try {
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+        try {
+            Utility.writeTo(dataInSvgFormat,bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         try {
             bos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void constructStringSVG(){
+        StringBuilder sb = new StringBuilder(2000);
+        Locale.setDefault(Locale.US);
+        sb.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
+        for(ColoredPolygon c : lastSavedPolygonList){
+            StaticPointArray spa = c.pointArray;
+            //String points = "";
+            sb.append("<polyline points='");
+            for(int i=0;i<spa.size();i++){
+                //points+=String.format("%d,%d ",spa.getX(i),spa.getY(i));
+                sb.append(String.format("%d,%d ",spa.getX(i),spa.getY(i)));
+            }
+            sb.append(String.format("'  style='fill:#%06X'/>\n",c.color*0xffffff));
+        }
+        sb.append("</svg>");
+        dataInSvgFormat = sb.toString();
     }
 }
