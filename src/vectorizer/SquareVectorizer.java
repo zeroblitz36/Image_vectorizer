@@ -58,6 +58,11 @@ public class SquareVectorizer extends BaseVectorizer{
                 g.setColor(new Color(s.color));
                 g.fillRect(s.l, s.t, s.r - s.l + 1, s.d - s.t + 1);
             }
+            int size = 32;
+            Font myFont = new Font("Serif",Font.BOLD, size);
+            g.setFont(myFont);
+            g.setColor(Color.RED);
+            g.drawString("SVG: "+svgStringBuilder.length() + " B",1,size+1);
             destImagePanel.setImage(image);
         }
     }
@@ -76,7 +81,7 @@ public class SquareVectorizer extends BaseVectorizer{
             lastSavedSquareList = fragList;
             lastSavedSquareTreeList = squareTreeList;
             if (canceled) return;
-            startTime = System.currentTimeMillis();
+            /*startTime = System.currentTimeMillis();
             BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
             Graphics2D g = image.createGraphics();
             for (SquareFragment s : fragList) {
@@ -87,7 +92,9 @@ public class SquareVectorizer extends BaseVectorizer{
             endTime = System.currentTimeMillis();
             if (canceled) return;
             if(destImagePanel!=null)
-                destImagePanel.setImage(image);
+                destImagePanel.setImage(image);*/
+            constructStringSVG();
+            drawFunction(lastSavedSquareList);
         }
 
         private void recFragCheck(SquareFragment s) {
@@ -302,23 +309,11 @@ public class SquareVectorizer extends BaseVectorizer{
     @Override
     public void exportToSVG(OutputStream os) {
         BufferedOutputStream bos = new BufferedOutputStream(os);
-        Locale.setDefault(Locale.US);
+        /*Locale.setDefault(Locale.US);
         try {
             Utility.writeTo(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h), bos);
             for(SquareFragment sf : lastSavedSquareList){
-                /*Utility.writeTo(String.format("<rect x='%f' y='%f' width='%f' height='%f' style='fill:#%06X'/>\n",
-                        sf.l-0.5,
-                        sf.t-0.5,
-                        sf.r-sf.l+1.5,
-                        sf.d-sf.t+1.5
-                        ,sf.color&0xffffff),bos);*/
-                /*String s = String.format("<polygon points='%d %d %d %d' fill='#%06X'/>\n",
-                        sf.l,
-                        sf.t,
-                        sf.r-sf.l+2,
-                        sf.d-sf.t+2,
-                        sf.color&0xffffff);
-                Utility.writeTo(s,bos);*/
+
                 Utility.writeTo(String.format("<rect x='%d'y='%d'width='%d'height='%d'style='fill:#%06X'/>\n",
                         sf.l,
                         sf.t,
@@ -330,11 +325,33 @@ public class SquareVectorizer extends BaseVectorizer{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        */
+        try {
+            Utility.writeTo(svgStringBuilder.toString(),bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         try {
             bos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    @Override
+    protected void constructStringSVG() {
+        Locale.setDefault(Locale.US);
+        svgStringBuilder.setLength(0);
+        svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
+        for(SquareFragment sf : lastSavedSquareList) {
+            svgStringBuilder.append(String.format("<rect x='%d'y='%d'width='%d'height='%d'style='fill:#%06X'/>\n",
+                    sf.l,
+                    sf.t,
+                    sf.r-sf.l+2,
+                    sf.d-sf.t+2,
+                    sf.color&0xffffff));
+        }
+        svgStringBuilder.append("</svg>");
     }
 }

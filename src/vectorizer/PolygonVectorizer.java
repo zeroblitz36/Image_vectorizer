@@ -15,8 +15,6 @@ public class PolygonVectorizer extends BaseVectorizer {
 
     private ArrayList<ColoredPolygon> lastSavedPolygonList;
 
-    private String dataInSvgFormat;
-
     public void setOriginalImage(BufferedImage image){
         super.setOriginalImage(image);
         list = new StaticPointArray(area);
@@ -49,7 +47,7 @@ public class PolygonVectorizer extends BaseVectorizer {
             Font myFont = new Font("Serif",Font.BOLD, size);
             g.setFont(myFont);
             g.setColor(Color.RED);
-            g.drawString("SVG: "+dataInSvgFormat.length() + " B",1,size+1);
+            g.drawString("SVG: "+svgStringBuilder.length() + " B",1,size+1);
             destImagePanel.setImage(destImage);
         }
     }
@@ -440,7 +438,7 @@ public class PolygonVectorizer extends BaseVectorizer {
             e.printStackTrace();
         }*/
         try {
-            Utility.writeTo(dataInSvgFormat,bos);
+            Utility.writeTo(svgStringBuilder.toString(),bos);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -453,25 +451,25 @@ public class PolygonVectorizer extends BaseVectorizer {
     }
 
     public void constructStringSVG(){
-        StringBuilder sb = new StringBuilder(2000000);
         Locale.setDefault(Locale.US);
-        sb.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
+        svgStringBuilder.setLength(0);
+        svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
         for(ColoredPolygon c : lastSavedPolygonList){
             StaticPointArray spa = c.pointArray;
             //String points = "";
-            sb.append("<polyline points='");
+            svgStringBuilder.append("<polyline points='");
             for(int i=0;i<spa.size();i++){
                 //points+=String.format("%d,%d ",spa.getX(i),spa.getY(i));
                 //sb.append(String.format("%d,%d ",spa.getX(i),spa.getY(i)));
-                sb.append(spa.getX(i));
-                sb.append(',');
-                sb.append(spa.getY(i));
-                sb.append(' ');
+                svgStringBuilder.append(spa.getX(i));
+                svgStringBuilder.append(',');
+                svgStringBuilder.append(spa.getY(i));
+                svgStringBuilder.append(' ');
             }
-            sb.setLength(sb.length()-1);
-            sb.append(String.format("' style='fill:#%06X'/>\n",c.color&0xffffff));
+            svgStringBuilder.setLength(svgStringBuilder.length()-1);
+            svgStringBuilder.append(String.format("' style='fill:#%06X'/>\n",c.color&0xffffff));
         }
-        sb.append("</svg>");
-        dataInSvgFormat = sb.toString();
+        svgStringBuilder.append("</svg>");
+        //dataInSvgFormat = svgStringBuilder.toString();
     }
 }

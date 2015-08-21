@@ -52,6 +52,11 @@ public class TriangleVectorizer extends BaseVectorizer{
                 g.setColor(new Color(t.color));
                 g.fill(t.getClonePath());
             }
+            int size = 32;
+            Font myFont = new Font("Serif",Font.BOLD, size);
+            g.setFont(myFont);
+            g.setColor(Color.RED);
+            g.drawString("SVG: "+svgStringBuilder.length() + " B",1,size+1);
             destImagePanel.setImage(destImage);
         }
     }
@@ -85,8 +90,9 @@ public class TriangleVectorizer extends BaseVectorizer{
             }
 
             if(canceled)return;
-            drawTriangles(triangles);
             lastSavedTriangleList = triangles;
+            constructStringSVG();
+            drawTriangles(triangles);
         }
 
         public void recTriangulation(Triangle triangle){
@@ -246,13 +252,14 @@ public class TriangleVectorizer extends BaseVectorizer{
         Locale.setDefault(Locale.US);
 
         try {
-            Utility.writeTo(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h), bos);
+            /*Utility.writeTo(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h), bos);
             for(Triangle t : lastSavedTriangleList){
                 String s = String.format("<polyline points='%f,%f %f,%f %f,%f' style='fill:#%06X' />\n",
                         t.x0,t.y0,t.x1,t.y1,t.x2,t.y2,t.color&0xffffff);
                 Utility.writeTo(s,bos);
             }
-            Utility.writeTo("</svg>",bos);
+            Utility.writeTo("</svg>",bos);*/
+            Utility.writeTo(svgStringBuilder.toString(),bos);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -262,5 +269,17 @@ public class TriangleVectorizer extends BaseVectorizer{
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void constructStringSVG() {
+        Locale.setDefault(Locale.US);
+        svgStringBuilder.setLength(0);
+        svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
+        for(Triangle t:lastSavedTriangleList){
+            svgStringBuilder.append(String.format("<polyline points='%f,%f %f,%f %f,%f' style='fill:#%06X' />\n",
+                    t.x0,t.y0,t.x1,t.y1,t.x2,t.y2,t.color&0xffffff));
+        }
+        svgStringBuilder.append("</svg>");
     }
 }

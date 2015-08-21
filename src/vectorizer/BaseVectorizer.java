@@ -21,6 +21,9 @@ public abstract class BaseVectorizer {
     protected ImagePanel destImagePanel;
     protected JobThread lastJob;
     protected final Object jobLock=new Object();
+    protected StringBuilder svgStringBuilder = new StringBuilder(2000000);
+
+
 
     protected final static byte NONE_TYPE = 0;
     protected final static byte SQUARE_TYPE = 1;
@@ -110,4 +113,6 @@ public abstract class BaseVectorizer {
             this.canceled = canceled;
         }
     }
+
+    protected abstract void constructStringSVG();
 }
