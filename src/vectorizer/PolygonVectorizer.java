@@ -438,17 +438,13 @@ public class PolygonVectorizer extends BaseVectorizer {
             Utility.writeTo("</svg>",bos);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        try {
-            bos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }*/
         try {
             Utility.writeTo(dataInSvgFormat,bos);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         try {
             bos.close();
         } catch (IOException e) {
@@ -457,7 +453,7 @@ public class PolygonVectorizer extends BaseVectorizer {
     }
 
     public void constructStringSVG(){
-        StringBuilder sb = new StringBuilder(2000);
+        StringBuilder sb = new StringBuilder(2000000);
         Locale.setDefault(Locale.US);
         sb.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
         for(ColoredPolygon c : lastSavedPolygonList){
@@ -466,9 +462,14 @@ public class PolygonVectorizer extends BaseVectorizer {
             sb.append("<polyline points='");
             for(int i=0;i<spa.size();i++){
                 //points+=String.format("%d,%d ",spa.getX(i),spa.getY(i));
-                sb.append(String.format("%d,%d ",spa.getX(i),spa.getY(i)));
+                //sb.append(String.format("%d,%d ",spa.getX(i),spa.getY(i)));
+                sb.append(spa.getX(i));
+                sb.append(',');
+                sb.append(spa.getY(i));
+                sb.append(' ');
             }
-            sb.append(String.format("'  style='fill:#%06X'/>\n",c.color*0xffffff));
+            sb.setLength(sb.length()-1);
+            sb.append(String.format("' style='fill:#%06X'/>\n",c.color&0xffffff));
         }
         sb.append("</svg>");
         dataInSvgFormat = sb.toString();
