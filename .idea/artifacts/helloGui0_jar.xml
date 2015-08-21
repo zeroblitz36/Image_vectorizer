@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="helloGui0:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/helloGui0_jar</output-path>
+    <root id="archive" name="helloGui0.jar">
+      <element id="module-output" name="helloGui0" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/ejml-0.25.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
