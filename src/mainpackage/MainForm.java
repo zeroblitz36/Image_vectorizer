@@ -112,12 +112,12 @@ public class MainForm {
         btnExport.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(currentVectorizer!=null){
+                if (currentVectorizer != null) {
                     final JFileChooser fc = new JFileChooser("C:\\Vectorizer");
 
                     fc.setDialogTitle("Export vectorized image");
                     int returnedValue = fc.showSaveDialog(btnExport);
-                    if(returnedValue == JFileChooser.APPROVE_OPTION){
+                    if (returnedValue == JFileChooser.APPROVE_OPTION) {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -127,11 +127,13 @@ public class MainForm {
                                     DataOutputStream dos = new DataOutputStream(fos);
                                     System.out.println("Exporting to output stream");
                                     String fileName = file.getName();
-                                    if(fileName.endsWith(".svg")){
-                                        currentVectorizer.exportToSVG(dos);
-                                    }else if(fileName.endsWith(".html")){
+                                    if (fileName.endsWith(".svg")) {
+                                        currentVectorizer.exportToSVG(dos, false);
+                                    } else if (fileName.endsWith(".svgz")) {
+                                        currentVectorizer.exportToSVG(dos, true);
+                                    } else if (fileName.endsWith(".html")) {
                                         currentVectorizer.exportToHTML(dos);
-                                    }else {
+                                    } else {
                                         currentVectorizer.exportToOutputStream(dos);
                                     }
                                     System.out.println("Exporting done");

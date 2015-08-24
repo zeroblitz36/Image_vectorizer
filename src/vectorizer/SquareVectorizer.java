@@ -6,13 +6,11 @@ import utils.Utility;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
+import java.util.zip.GZIPOutputStream;
 
 public class SquareVectorizer extends BaseVectorizer{
     private ArrayList<SquareFragment> lastSavedSquareList;
@@ -63,6 +61,11 @@ public class SquareVectorizer extends BaseVectorizer{
             g.setFont(myFont);
             g.setColor(Color.RED);
             g.drawString("SVG: "+svgStringBuilder.length() + " B",1,size+1);
+            //get compressed size
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(size/2);
+            exportToSVG(baos, true);
+            int compressedSize = baos.size();
+            g.drawString("SVGZ: "+compressedSize+" B",1,2*size + 2);
             destImagePanel.setImage(image);
         }
     }
@@ -262,9 +265,6 @@ public class SquareVectorizer extends BaseVectorizer{
 
     public void importFromInputStream(InputStream is) {
         try{
-            //ObjectInput oi = new ObjectInputStream(is);
-            //ArrayList<SquareFragment> list = (ArrayList<SquareFragment>) oi.readObject();
-            //lastSavedSquareList = list;
             ProtoBitSet pbs = new ProtoBitSet();
             byte[] buffer = new byte[1000];
             int l;
@@ -307,25 +307,15 @@ public class SquareVectorizer extends BaseVectorizer{
     }
 
     @Override
-    public void exportToSVG(OutputStream os) {
-        BufferedOutputStream bos = new BufferedOutputStream(os);
-        /*Locale.setDefault(Locale.US);
-        try {
-            Utility.writeTo(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h), bos);
-            for(SquareFragment sf : lastSavedSquareList){
-
-                Utility.writeTo(String.format("<rect x='%d'y='%d'width='%d'height='%d'style='fill:#%06X'/>\n",
-                        sf.l,
-                        sf.t,
-                        sf.r-sf.l+2,
-                        sf.d-sf.t+2,
-                        sf.color&0xffffff),bos);
+    public void exportToSVG(OutputStream os,boolean isCompressed) {
+        if(isCompressed){
+            try {
+                os = new GZIPOutputStream(os);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            Utility.writeTo("</svg>",bos);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        */
+        BufferedOutputStream bos = new BufferedOutputStream(os);
         try {
             Utility.writeTo(svgStringBuilder.toString(),bos);
         } catch (IOException e) {
@@ -343,9 +333,9 @@ public class SquareVectorizer extends BaseVectorizer{
     protected void constructStringSVG() {
         Locale.setDefault(Locale.US);
         svgStringBuilder.setLength(0);
-        svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
+        svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>\n", w, h));
         for(SquareFragment sf : lastSavedSquareList) {
-            svgStringBuilder.append(String.format("<rect x='%d'y='%d'width='%d'height='%d'style='fill:#%06X'/>\n",
+            svgStringBuilder.append(String.format("<rect x='%d' y='%d' width='%d' height='%d' style='fill:#%06X'/>\n",
                     sf.l,
                     sf.t,
                     sf.r-sf.l+2,

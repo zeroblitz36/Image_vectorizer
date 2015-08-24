@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.zip.GZIPOutputStream;
 
 public class PolygonVectorizer extends BaseVectorizer {
     private StaticPointArray list;
@@ -48,6 +49,12 @@ public class PolygonVectorizer extends BaseVectorizer {
             g.setFont(myFont);
             g.setColor(Color.RED);
             g.drawString("SVG: "+svgStringBuilder.length() + " B",1,size+1);
+
+            //get compressed size
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(size/2);
+            exportToSVG(baos,true);
+            int compressedSize = baos.size();
+            g.drawString("SVGZ: "+compressedSize+" B",1,2*size + 2);
             destImagePanel.setImage(destImage);
         }
     }
@@ -418,31 +425,20 @@ public class PolygonVectorizer extends BaseVectorizer {
     }
 
     @Override
-    public void exportToSVG(OutputStream os) {
-        BufferedOutputStream bos = new BufferedOutputStream(os);
-        /*Locale.setDefault(Locale.US);
-        try {
-            Utility.writeTo(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h), bos);
-            for(ColoredPolygon c : lastSavedPolygonList){
-                StaticPointArray spa = c.pointArray;
-                String points = "";
-                for(int i=0;i<spa.size();i++){
-                    points+=String.format("%d,%d ",spa.getX(i),spa.getY(i));
-                }
-                String s = String.format("<polyline points='%s'  style='fill:#%06X'/>\n",
-                        points,c.color&0xffffff);
-                Utility.writeTo(s,bos);
+    public void exportToSVG(OutputStream os, boolean isCompressed) {
+        if(isCompressed){
+            try {
+                os = new GZIPOutputStream(os);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            Utility.writeTo("</svg>",bos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        }
+        BufferedOutputStream bos = new BufferedOutputStream(os);
         try {
             Utility.writeTo(svgStringBuilder.toString(),bos);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         try {
             bos.close();
         } catch (IOException e) {
