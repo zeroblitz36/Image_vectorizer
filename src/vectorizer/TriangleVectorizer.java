@@ -72,31 +72,29 @@ public class TriangleVectorizer extends BaseVectorizer{
 
     private class Job extends JobThread{
         private ArrayList<Triangle> triangles = new ArrayList<>();
-        private final Object triangleLock = new Object();
         @Override
         public void run() {
-            try {
-                Thread.sleep(15);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             if(canceled)return;
             final Triangle t1 = new Triangle(0,0,w-1,0,w-1,h-1);
             final Triangle t2 = new Triangle(0,0,0,h-1,w-1,h-1);
 
+            ArrayList<Triangle> triangleArray1 = new ArrayList<>();
+            ArrayList<Triangle> triangleArray2 = new ArrayList<>();
             Thread th = new Thread(() -> {
-                recTriangulation(t1);
+                recTriangulation(t1,triangleArray1);
             });
             th.start();
 
-            recTriangulation(t2);
-
+            recTriangulation(t2,triangleArray2);
 
             try {
                 th.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            triangles.ensureCapacity(triangleArray1.size()+triangleArray2.size());
+            triangles.addAll(triangleArray1);
+            triangles.addAll(triangleArray2);
 
             if(canceled)return;
             lastSavedTriangleList = triangles;
@@ -104,7 +102,7 @@ public class TriangleVectorizer extends BaseVectorizer{
             drawTriangles(triangles);
         }
 
-        public void recTriangulation(Triangle triangle){
+        public void recTriangulation(Triangle triangle,ArrayList<Triangle> triangles){
             float i0=0,i1=0,man;
             int flag;
             float a;
@@ -197,9 +195,7 @@ public class TriangleVectorizer extends BaseVectorizer{
             if(count==0)return;
             if(!fail || triangle.area<=3){
                 triangle.color = 0xff000000 | (rTotal<<16) | (gTotal<<8) | bTotal;
-                synchronized (triangleLock) {
-                    triangles.add(triangle);
-                }
+                triangles.add(triangle);
             }else{
 
                 double dist0 = Math.sqrt((x0-x1)*(x0-x1) + (y0-y1)*(y0-y1));
@@ -223,8 +219,8 @@ public class TriangleVectorizer extends BaseVectorizer{
                     t2 = new Triangle(interpolate(x2,x0,r),interpolate(y2,y0,r),x1,y1,x0,y0);
                 }
 
-                if(t1.area>0.5)recTriangulation(t1);
-                if(t2.area>0.5)recTriangulation(t2);
+                if(t1.area>0.5)recTriangulation(t1,triangles);
+                if(t2.area>0.5)recTriangulation(t2,triangles);
             }
         }
     }
@@ -294,7 +290,15 @@ public class TriangleVectorizer extends BaseVectorizer{
                     t.x2,
                     t.y2,
                     t.color&0xffffff));*/
-            svgStringBuilder.append(String.format("<polyline points='%s,%s %s,%s %s,%s' style='fill:#%06X' />\n",
+            /*svgStringBuilder.append(String.format("<polyline points='%s,%s %s,%s %s,%s' style='fill:#%06X' />\n",
+                    decimalFormat.format(t.x0),
+                    decimalFormat.format(t.y0),
+                    decimalFormat.format(t.x1),
+                    decimalFormat.format(t.y1),
+                    decimalFormat.format(t.x2),
+                    decimalFormat.format(t.y2),
+                    t.color&0xffffff));*/
+            svgStringBuilder.append(String.format("<path d='M%s,%sL%s,%sL%s,%sZ' fill='#%06X'/>\n",
                     decimalFormat.format(t.x0),
                     decimalFormat.format(t.y0),
                     decimalFormat.format(t.x1),
