@@ -1,2 +1,3 @@
 http://vector-conversions.com/vectorizing/raster_vs_vector.html
 https://en.wikipedia.org/wiki/Vector_graphics
+https://en.wikipedia.org/wiki/IntelliJ_IDEA

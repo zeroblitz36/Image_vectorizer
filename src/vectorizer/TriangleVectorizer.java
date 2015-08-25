@@ -204,6 +204,7 @@ public class TriangleVectorizer extends BaseVectorizer{
 
                 float r = random.nextFloat()*0.6f + 0.2f;
                 float delta = 0.01f;
+                delta = 0;
                 Triangle t1,t2;
                 if(dist0>=dist1 && dist0>=dist2){
                     t1 = new Triangle(interpolate(x0,x1,r),interpolate(y0,y1,r),x2,y2,x0,y0);
@@ -279,34 +280,21 @@ public class TriangleVectorizer extends BaseVectorizer{
     protected void constructStringSVG() {
         Locale.setDefault(Locale.US);
         svgStringBuilder.setLength(0);
-        svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
+        svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>\n", w, h));
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
+        svgStringBuilder.append(String.format("<g stroke-width='0.5'>\n"));
         for(Triangle t:lastSavedTriangleList){
-            /*svgStringBuilder.append(String.format("<polyline points='%f,%f %f,%f %f,%f' style='fill:#%06X' />\n",
-                    t.x0,
-                    t.y0,
-                    t.x1,
-                    t.y1,
-                    t.x2,
-                    t.y2,
-                    t.color&0xffffff));*/
-            /*svgStringBuilder.append(String.format("<polyline points='%s,%s %s,%s %s,%s' style='fill:#%06X' />\n",
+            svgStringBuilder.append(String.format("<path d='M%s,%sL%s,%sL%s,%sZ' fill='#%06X' stroke='#%06X'/>\n",
                     decimalFormat.format(t.x0),
                     decimalFormat.format(t.y0),
                     decimalFormat.format(t.x1),
                     decimalFormat.format(t.y1),
                     decimalFormat.format(t.x2),
                     decimalFormat.format(t.y2),
-                    t.color&0xffffff));*/
-            svgStringBuilder.append(String.format("<path d='M%s,%sL%s,%sL%s,%sZ' fill='#%06X'/>\n",
-                    decimalFormat.format(t.x0),
-                    decimalFormat.format(t.y0),
-                    decimalFormat.format(t.x1),
-                    decimalFormat.format(t.y1),
-                    decimalFormat.format(t.x2),
-                    decimalFormat.format(t.y2),
+                    t.color&0xffffff,
                     t.color&0xffffff));
         }
+        svgStringBuilder.append("</g>\n");
         svgStringBuilder.append("</svg>");
     }
 }
