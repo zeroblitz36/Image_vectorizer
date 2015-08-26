@@ -196,7 +196,7 @@ public class PolygonVectorizer extends BaseVectorizer {
         private ColoredPolygon findShape(short x,short y){
             ColoredPolygon coloredPolygon = new ColoredPolygon();
             Path2D.Float path = new Path2D.Float();
-            int startColor = originalImage.getRGB(x,y);
+            int startColor = colorOrig(x,y);
             int rTotal=0,gTotal=0,bTotal=0;
             int count=0;
             int currentColor;
@@ -232,7 +232,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                 int index = y0*w+x0;
                 if(x0<0 || x0>=w || y0<0 || y0>=h)continue;
                 if(workMatrix[index]!=0)continue;
-                currentColor = originalImage.getRGB(x0,y0);
+                currentColor = colorOrig(x0,y0);
 
                 if(minX>x0)minX = x0;
                 if(minY>y0)minY = y0;

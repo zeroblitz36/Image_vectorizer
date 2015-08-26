@@ -84,18 +84,6 @@ public class SquareVectorizer extends BaseVectorizer{
             lastSavedSquareList = fragList;
             lastSavedSquareTreeList = squareTreeList;
             if (canceled) return;
-            /*startTime = System.currentTimeMillis();
-            BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
-            Graphics2D g = image.createGraphics();
-            for (SquareFragment s : fragList) {
-                if (canceled) return;
-                g.setColor(new Color(s.color));
-                g.fillRect(s.l, s.t, s.r - s.l + 1, s.d - s.t + 1);
-            }
-            endTime = System.currentTimeMillis();
-            if (canceled) return;
-            if(destImagePanel!=null)
-                destImagePanel.setImage(image);*/
             constructStringSVG();
             drawFunction(lastSavedSquareList);
         }
@@ -111,7 +99,7 @@ public class SquareVectorizer extends BaseVectorizer{
                 for (int x = s.l; x <= s.r && !fail; x++) {
                     if (canceled) return;
                     count++;
-                    color = originalImage.getRGB(x, y);
+                    color = colorOrig(x, y);
                     b = color & 0xff;
                     color >>= 8;
                     g = color & 0xff;
@@ -137,7 +125,7 @@ public class SquareVectorizer extends BaseVectorizer{
             for (int y = s.t; y <= s.d && !fail; y++)
                 for (int x = s.l; x <= s.r && !fail; x++) {
                     if (canceled) return;
-                    color = originalImage.getRGB(x, y);
+                    color = colorOrig(x, y);
                     if (Utility.manhattanDistance(color, avgColor) > threshold)
                         fail = true;
                 }

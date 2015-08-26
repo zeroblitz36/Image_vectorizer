@@ -23,13 +23,6 @@ public abstract class BaseVectorizer {
     protected final Object jobLock=new Object();
     protected StringBuilder svgStringBuilder = new StringBuilder(2000000);
 
-
-
-    protected final static byte NONE_TYPE = 0;
-    protected final static byte SQUARE_TYPE = 1;
-    protected final static byte TRIANGLE_TYPE = 2;
-    protected final static byte POLYGON_TYPE = 3;
-
     public abstract void startJob();
     public abstract void cancelLastJob();
 
@@ -51,6 +44,7 @@ public abstract class BaseVectorizer {
     public char greenOrig(int x,int y){
         return originalGreenArray[y*w+x];
     }
+    public int colorOrig(int x,int y) { return originalColorArray[y*w+x]; }
 
     protected char abs(char a,char b){
         return (char) (a>b ? a-b : b-a);
