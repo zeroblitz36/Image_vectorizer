@@ -17,6 +17,16 @@ public class SquareFragment implements Serializable {
         this.color = color;
     }
 
+    public SquareFragment() {
+
+    }
+
+    public void set(short l, short r, short t, short d){
+        this.l = l;
+        this.r = r;
+        this.t = t;
+        this.d = d;
+    }
     public boolean isValid() {
         return l <= r && t <= d;
     }

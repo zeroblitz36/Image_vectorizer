@@ -7,14 +7,12 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
 public class SquareVectorizer extends BaseVectorizer{
     private ArrayList<SquareFragment> lastSavedSquareList;
-    private ArrayList<SquareTree> lastSavedSquareTreeList;
+    //private ArrayList<SquareTree> lastSavedSquareTreeList;
     private ProtoBitSet lastBitSet;
     private final Object fragListLock = new Object();
     private Random random = new Random(System.currentTimeMillis());
@@ -72,23 +70,67 @@ public class SquareVectorizer extends BaseVectorizer{
 
     private class Job extends JobThread{
         private ArrayList<SquareFragment> fragList = new ArrayList<>();
-        private ArrayList<SquareTree> squareTreeList = new ArrayList<>();
+        //private ArrayList<SquareTree> squareTreeList = new ArrayList<>();
         @Override
         public void run() {
             if (originalImage == null || canceled) return;
             SquareFragment squareFragment = new SquareFragment((short)0,(short) (w - 1),(short) 0, (short)(h - 1), -1);
             startTime = System.currentTimeMillis();
-            recFragCheck(squareFragment);
+            //recFragCheck(squareFragment);
             //splitRecFragCheck(squareFragment);
+            SquareFragment s1 = new SquareFragment();
+            SquareFragment s2 = new SquareFragment();
+            SquareFragment s3 = new SquareFragment();
+            SquareFragment s4 = new SquareFragment();
+            splitSquareFragmentInFour(squareFragment,s1,s2,s3,s4);
+            LinkedList<SquareFragment> fragList1 = new LinkedList<>();
+            LinkedList<SquareFragment> fragList2 = new LinkedList<>();
+            LinkedList<SquareFragment> fragList3 = new LinkedList<>();
+            LinkedList<SquareFragment> fragList4 = new LinkedList<>();
+            Thread t1 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (s1.isValid()) recFragCheck(s1,fragList1);
+                }
+            });
+            Thread t2 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (s2.isValid()) recFragCheck(s2,fragList2);
+                }
+            });
+            Thread t3 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (s3.isValid()) recFragCheck(s3,fragList3);
+                }
+            });
+            t1.start();
+            t2.start();
+            t3.start();
+            if (s4.isValid()) recFragCheck(s4,fragList4);
+            fragList.addAll(fragList4);
+            try {
+                t1.join();
+                fragList.addAll(fragList1);
+                t2.join();
+                fragList.addAll(fragList2);
+                t3.join();
+                fragList.addAll(fragList3);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             endTime = System.currentTimeMillis();
+
             lastSavedSquareList = fragList;
-            lastSavedSquareTreeList = squareTreeList;
+            //lastSavedSquareTreeList = squareTreeList;
             if (canceled) return;
             constructStringSVG();
             drawFunction(lastSavedSquareList);
         }
 
-        private void recFragCheck(SquareFragment s) {
+        private void recFragCheck(SquareFragment s,Collection<SquareFragment> localFragList) {
             int rTotal = 0, gTotal = 0, bTotal = 0, count = 0, color;
             int r, g, b;
             int t, min = 9999, max = -9999;
@@ -131,27 +173,39 @@ public class SquareVectorizer extends BaseVectorizer{
                 }
             if (!fail) {
                 s.color = avgColor;
-                synchronized (fragListLock) {
-                    fragList.add(s);
-                }
-                squareTreeList.add(new SquareTree(s.color,-1,-1));
+                localFragList.add(s);
+                //squareTreeList.add(new SquareTree(s.color,-1,-1));
             } else {
-                short midX = (short) (s.l + (random.nextFloat() / 2 + 0.25f) * (s.r - s.l));
-                short midY = (short) (s.t + (random.nextFloat() / 2 + 0.25f) * (s.d - s.t));
-                squareTreeList.add(new SquareTree(-1,midX,midY));
-                SquareFragment s1 = new SquareFragment(s.l, midX, s.t, midY, -1);
-                SquareFragment s2 = new SquareFragment((short) (midX + 1), s.r, s.t, midY, -1);
-                SquareFragment s3 = new SquareFragment(s.l, midX, (short) (midY + 1), s.d, -1);
-                SquareFragment s4 = new SquareFragment((short)(midX + 1), s.r, (short) (midY + 1), s.d, -1);
+                //short midX = (short) (s.l + (random.nextFloat() / 2 + 0.25f) * (s.r - s.l));
+                //short midY = (short) (s.t + (random.nextFloat() / 2 + 0.25f) * (s.d - s.t));
+                //squareTreeList.add(new SquareTree(-1,midX,midY));
+                //SquareFragment s1 = new SquareFragment(s.l, midX, s.t, midY, -1);
+                //SquareFragment s2 = new SquareFragment((short) (midX + 1), s.r, s.t, midY, -1);
+                //SquareFragment s3 = new SquareFragment(s.l, midX, (short) (midY + 1), s.d, -1);
+                //SquareFragment s4 = new SquareFragment((short)(midX + 1), s.r, (short) (midY + 1), s.d, -1);
+                SquareFragment s1 = new SquareFragment();
+                SquareFragment s2 = new SquareFragment();
+                SquareFragment s3 = new SquareFragment();
+                SquareFragment s4 = new SquareFragment();
+                splitSquareFragmentInFour(s,s1,s2,s3,s4);
 
-                if (s1.isValid()) recFragCheck(s1);
-                if (s2.isValid()) recFragCheck(s2);
-                if (s3.isValid()) recFragCheck(s3);
-                if (s4.isValid()) recFragCheck(s4);
+                if (s1.isValid()) recFragCheck(s1,localFragList);
+                if (s2.isValid()) recFragCheck(s2,localFragList);
+                if (s3.isValid()) recFragCheck(s3,localFragList);
+                if (s4.isValid()) recFragCheck(s4,localFragList);
             }
         }
 
+        private void splitSquareFragmentInFour(SquareFragment s,SquareFragment s1,SquareFragment s2,SquareFragment s3,SquareFragment s4){
+            short midX = (short) (s.l + (random.nextFloat() / 2 + 0.25f) * (s.r - s.l));
+            short midY = (short) (s.t + (random.nextFloat() / 2 + 0.25f) * (s.d - s.t));
 
+            s1.set(s.l, midX, s.t, midY);
+            s2.set((short) (midX + 1), s.r, s.t, midY);
+            s3.set(s.l, midX, (short) (midY + 1), s.d);
+            s4.set((short)(midX + 1), s.r, (short) (midY + 1), s.d);
+        }
+        /*
         private void splitRecFragCheck(SquareFragment s) {
             short midX = (short) (s.l + (random.nextFloat() / 2 + 0.25f) * (s.r - s.l));
             short midY = (short) (s.t + (random.nextFloat() / 2 + 0.25f) * (s.d - s.t));
@@ -180,8 +234,9 @@ public class SquareVectorizer extends BaseVectorizer{
                     e.printStackTrace();
                 }
             }
-        }
+        }*/
     }
+    /*
     public void prepareProtoBitSet(){
         byte coordDataSize = 0;
         int max = w>h?w:h;
@@ -213,10 +268,11 @@ public class SquareVectorizer extends BaseVectorizer{
         System.out.format("BitSet size = %d\n",pbs.currentLength);
         lastBitSet = pbs;
     }
-
+    */
     public void decodeSquareTreeArray(ArrayList<SquareTree> list){
 
     }
+    /*
     private void decodeBitSet(ProtoBitSet pbs){
         pbs.resetReadCounter();
         //coordinate data size
@@ -231,7 +287,7 @@ public class SquareVectorizer extends BaseVectorizer{
             list.add(decodeSquareTrees(pbs,coordDataSize));
         }
         lastSavedSquareTreeList = list;
-    }
+    }*/
     private SquareTree decodeSquareTrees(ProtoBitSet pbs,int dataSize){
         //if its true then it contains further child nodes
         if(pbs.readBoolean()){
@@ -244,7 +300,7 @@ public class SquareVectorizer extends BaseVectorizer{
     }
     public void exportToOutputStream(OutputStream os) {
         try {
-            prepareProtoBitSet();
+            //prepareProtoBitSet();
             os.write(lastBitSet.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();
