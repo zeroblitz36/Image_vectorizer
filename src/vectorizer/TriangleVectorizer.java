@@ -177,9 +177,10 @@ public class TriangleVectorizer extends BaseVectorizer{
                             gTotal += greenOrig(x, y);
                             bTotal += blueOrig(x, y);
                         }else{
-                            m = abs((char) rTotal,redOrig(x,y)) +
-                                    abs((char) gTotal,greenOrig(x,y)) +
-                                    abs((char) bTotal,blueOrig(x,y));
+
+                            m = Math.abs(rTotal - redOrig(x, y)) +
+                                    Math.abs(gTotal - greenOrig(x, y)) +
+                                    Math.abs(bTotal - blueOrig(x, y));
                             if(m > threshold)
                                 fail = true;
                         }
@@ -207,17 +208,17 @@ public class TriangleVectorizer extends BaseVectorizer{
                 delta = 0;
                 Triangle t1,t2;
                 if(dist0>=dist1 && dist0>=dist2){
-                    t1 = new Triangle(interpolate(x0,x1,r),interpolate(y0,y1,r),x2,y2,x0,y0);
+                    t1 = new Triangle(Utility.interpolate(x0, x1, r),Utility.interpolate(y0, y1, r),x2,y2,x0,y0);
                     r -= delta;
-                    t2 = new Triangle(interpolate(x0,x1,r),interpolate(y0,y1,r),x2,y2,x1,y1);
+                    t2 = new Triangle(Utility.interpolate(x0, x1, r),Utility.interpolate(y0, y1, r),x2,y2,x1,y1);
                 }else if(dist1>=dist0 && dist1>=dist2){
-                    t1 = new Triangle(interpolate(x2,x1,r),interpolate(y2,y1,r),x0,y0,x2,y2);
+                    t1 = new Triangle(Utility.interpolate(x2, x1, r),Utility.interpolate(y2, y1, r),x0,y0,x2,y2);
                     r -= delta;
-                    t2 = new Triangle(interpolate(x2,x1,r),interpolate(y2,y1,r),x0,y0,x1,y1);
+                    t2 = new Triangle(Utility.interpolate(x2, x1, r),Utility.interpolate(y2, y1, r),x0,y0,x1,y1);
                 }else{
-                    t1 = new Triangle(interpolate(x2,x0,r),interpolate(y2,y0,r),x1,y1,x2,y2);
+                    t1 = new Triangle(Utility.interpolate(x2, x0, r),Utility.interpolate(y2, y0, r),x1,y1,x2,y2);
                     r -= delta;
-                    t2 = new Triangle(interpolate(x2,x0,r),interpolate(y2,y0,r),x1,y1,x0,y0);
+                    t2 = new Triangle(Utility.interpolate(x2, x0, r),Utility.interpolate(y2, y0, r),x1,y1,x0,y0);
                 }
 
                 if(t1.area>0.5)recTriangulation(t1,triangles);

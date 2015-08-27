@@ -31,28 +31,14 @@ public abstract class BaseVectorizer {
     public abstract void exportToHTML(OutputStream os);
     public abstract void exportToSVG(OutputStream os,boolean isCompressed);
 
-    public float interpolate(float a, float b,float x){
-        return a + x*(b-a);
-    }
-
     public char redOrig(int x,int y){
         return originalRedArray[y*w+x];
     }
     public char blueOrig(int x,int y){
         return originalBlueArray[y*w+x];
     }
-    public char greenOrig(int x,int y){
-        return originalGreenArray[y*w+x];
-    }
+    public char greenOrig(int x,int y){ return originalGreenArray[y*w+x];}
     public int colorOrig(int x,int y) { return originalColorArray[y*w+x]; }
-
-    protected char abs(char a,char b){
-        return (char) (a>b ? a-b : b-a);
-    }
-
-    private int averageColor(int r,int g,int b,int count){
-        return 0xff000000 | (r<<16) | (g<<8) | b;
-    }
 
     public void initialize(){
         calculateColorArrays();

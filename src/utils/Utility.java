@@ -47,6 +47,8 @@ public class Utility {
         return a-b;
     }
 
+
+
     public static void writeTo(String s,OutputStream os) throws IOException {
         os.write(s.getBytes());
     }
@@ -57,5 +59,9 @@ public class Utility {
         float b = (y2-y1)*(y2-y1)+(x2-x1)*(x2-x1);
         b = (float) Math.sqrt(b);
         return a/b;
+    }
+
+    public static float interpolate(float a, float b,float x){
+        return a + x*(b-a);
     }
 }
