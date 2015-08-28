@@ -132,9 +132,9 @@ public class MainForm {
                                     } else if (fileName.endsWith(".svgz")) {
                                         currentVectorizer.exportToSVG(dos, true);
                                     } else if (fileName.endsWith(".html")) {
-                                        currentVectorizer.exportToHTML(dos);
+                                        //currentVectorizer.exportToHTML(dos);
                                     } else {
-                                        currentVectorizer.exportToOutputStream(dos);
+                                        //currentVectorizer.exportToOutputStream(dos);
                                     }
                                     System.out.println("Exporting done");
                                     dos.close();

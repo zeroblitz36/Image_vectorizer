@@ -419,33 +419,6 @@ public class PolygonVectorizer extends BaseVectorizer {
         }
     }
 
-    @Override
-    public void exportToHTML(OutputStream os) {
-
-    }
-
-    @Override
-    public void exportToSVG(OutputStream os, boolean isCompressed) {
-        if(isCompressed){
-            try {
-                os = new GZIPOutputStream(os);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        BufferedOutputStream bos = new BufferedOutputStream(os);
-        try {
-            Utility.writeTo(svgStringBuilder.toString(),bos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            bos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void constructStringSVG(){
         Locale.setDefault(Locale.US);
         svgStringBuilder.setLength(0);

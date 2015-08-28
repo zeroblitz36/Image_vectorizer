@@ -1,12 +1,11 @@
 package vectorizer;
 
 import utils.ImagePanel;
+import utils.Utility;
 
 import java.awt.image.BufferedImage;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.util.zip.GZIPOutputStream;
 
 public abstract class BaseVectorizer {
     protected BufferedImage originalImage;
@@ -26,10 +25,30 @@ public abstract class BaseVectorizer {
     public abstract void startJob();
     public abstract void cancelLastJob();
 
-    public abstract void exportToOutputStream(OutputStream os);
-    public abstract void importFromInputStream(InputStream is);
-    public abstract void exportToHTML(OutputStream os);
-    public abstract void exportToSVG(OutputStream os,boolean isCompressed);
+    //public abstract void exportToOutputStream(OutputStream os);
+    //public abstract void importFromInputStream(InputStream is);
+    //public abstract void exportToHTML(OutputStream os);
+    public void exportToSVG(OutputStream os,boolean isCompressed) {
+        if(isCompressed){
+            try {
+                os = new GZIPOutputStream(os);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        BufferedOutputStream bos = new BufferedOutputStream(os);
+        try {
+            Utility.writeTo(svgStringBuilder.toString(), bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public char redOrig(int x,int y){
         return originalRedArray[y*w+x];
