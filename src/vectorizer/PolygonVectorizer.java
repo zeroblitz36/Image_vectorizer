@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.zip.GZIPOutputStream;
 
 public class PolygonVectorizer extends BaseVectorizer {
     private StaticPointArray list;
@@ -72,48 +71,7 @@ public class PolygonVectorizer extends BaseVectorizer {
         private long startTime,endTime;
         private long workMatrixResetTime,coverSearchTime,perimeterSearchTime,workMatrixTransferTime;
         private long exportSvgTime;
-        /*
-        private void drawFunction(){
-            int x0,y0;
-            if(destImagePanel!=null) {
-                Graphics2D g = destImage.createGraphics();
-                g.setColor(Color.WHITE);
-                g.fillRect(0,0,w-1,h-1);
 
-                if(notDebug) {
-                    g.setStroke(new BasicStroke(0.5f));
-                    for (ColoredPolygon c : coloredPolygons) {
-                        if (canceled) return;
-                        g.setColor(new Color(c.color));
-                        g.fill(c.getPath());
-                    }
-                }else {
-                    for (int pixel = 0; pixel < h * w; pixel++) {
-                        y0 = pixel / w;
-                        x0 = pixel % w;
-                        if (canceled) return;
-                        switch (visitMatrix[pixel]) {
-                            case 0:
-                                g.setColor(Color.black);
-                                break;
-                            case 1:
-                                g.setColor(Color.BLUE);
-                                break;
-                            case 2:
-                                g.setColor(Color.RED);
-                                break;
-                            case 3:
-                                g.setColor(Color.GREEN);
-                                break;
-                            default:
-                                g.setColor(Color.PINK);
-                        }
-                        g.drawLine(x0, y0, x0, y0);
-                    }
-                }
-                destImagePanel.setImage(destImage);
-            }
-        }*/
         @Override
         public void run() {
             workMatrixResetTime=0;
@@ -398,38 +356,14 @@ public class PolygonVectorizer extends BaseVectorizer {
         }
     }
 
-    public void exportToOutputStream(OutputStream os){
-        try{
-            ObjectOutput oo = new ObjectOutputStream(os);
-            oo.writeObject(lastSavedPolygonList);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-    public void importFromInputStream(InputStream is){
-        try{
-            ObjectInput oi = new ObjectInputStream(is);
-            ArrayList<ColoredPolygon> list = (ArrayList<ColoredPolygon>) oi.readObject();
-            lastSavedPolygonList = list;
-            drawFunction(lastSavedPolygonList);
-        }catch (IOException e){
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void constructStringSVG(){
         Locale.setDefault(Locale.US);
         svgStringBuilder.setLength(0);
         svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
         for(ColoredPolygon c : lastSavedPolygonList){
             StaticPointArray spa = c.pointArray;
-            //String points = "";
             svgStringBuilder.append("<polyline points='");
             for(int i=0;i<spa.size();i++){
-                //points+=String.format("%d,%d ",spa.getX(i),spa.getY(i));
-                //sb.append(String.format("%d,%d ",spa.getX(i),spa.getY(i)));
                 svgStringBuilder.append(spa.getX(i));
                 svgStringBuilder.append(',');
                 svgStringBuilder.append(spa.getY(i));
@@ -439,6 +373,5 @@ public class PolygonVectorizer extends BaseVectorizer {
             svgStringBuilder.append(String.format("' style='fill:#%06X'/>\n",c.color&0xffffff));
         }
         svgStringBuilder.append("</svg>");
-        //dataInSvgFormat = svgStringBuilder.toString();
     }
 }

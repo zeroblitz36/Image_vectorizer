@@ -1,14 +1,11 @@
 package vectorizer;
 
-import utils.ProtoBitSet;
 import utils.Utility;
 
 import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
-import java.util.zip.GZIPOutputStream;
 
 public class SquareVectorizer extends BaseVectorizer{
     private ArrayList<SquareFragment> lastSavedSquareList;
@@ -103,20 +100,23 @@ public class SquareVectorizer extends BaseVectorizer{
             t2.start();
             t3.start();
             if (s4.isValid()) recFragCheck(s4,fragList4);
+            if(canceled) return;
             fragList.addAll(fragList4);
             try {
                 t1.join();
                 fragList.addAll(fragList1);
+                if(canceled) return;
                 t2.join();
                 fragList.addAll(fragList2);
+                if(canceled) return;
                 t3.join();
                 fragList.addAll(fragList3);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
+            if(canceled) return;
             endTime = System.currentTimeMillis();
-
             lastSavedSquareList = fragList;
             if (canceled) return;
             constructStringSVG();
@@ -134,13 +134,10 @@ public class SquareVectorizer extends BaseVectorizer{
                 for (int x = s.l; x <= s.r && !fail; x++) {
                     if (canceled) return;
                     count++;
-                    color = colorOrig(x, y);
-                    b = color & 0xff;
-                    color >>= 8;
-                    g = color & 0xff;
-                    color >>= 8;
-                    r = color & 0xff;
 
+                    r = redOrig(x,y);
+                    g = greenOrig(x,y);
+                    b = blueOrig(x,y);
                     t = r + g + b;
                     bTotal += b;
                     gTotal += g;
@@ -149,7 +146,7 @@ public class SquareVectorizer extends BaseVectorizer{
                     if (t < min) min = t;
                     if (t > max) max = t;
 
-                    if (max - min > threshold << 1) {
+                    if (max - min > threshold) {
                         fail = true;
                     }
                 }

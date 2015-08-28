@@ -9,8 +9,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
-import java.util.zip.GZIPOutputStream;
-
 public class TriangleVectorizer extends BaseVectorizer{
 
     private Random random = new Random(System.currentTimeMillis());
@@ -224,27 +222,6 @@ public class TriangleVectorizer extends BaseVectorizer{
                 if(t1.area>0.5)recTriangulation(t1,triangles);
                 if(t2.area>0.5)recTriangulation(t2,triangles);
             }
-        }
-    }
-
-    public void exportToOutputStream(OutputStream os) {
-        try {
-            ObjectOutput oo = new ObjectOutputStream(os);
-            oo.writeObject(lastSavedTriangleList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    public void importFromInputStream(InputStream is) {
-        try {
-            ObjectInput oi = new ObjectInputStream(is);
-            ArrayList<Triangle> list = (ArrayList<Triangle>) oi.readObject();
-            lastSavedTriangleList = list;
-            drawTriangles(lastSavedTriangleList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
     }
 
