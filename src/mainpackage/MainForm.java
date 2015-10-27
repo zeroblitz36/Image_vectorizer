@@ -1,10 +1,7 @@
 package mainpackage;
 
 import utils.ImagePanel;
-import vectorizer.BaseVectorizer;
-import vectorizer.PolygonVectorizer;
-import vectorizer.SquareVectorizer;
-import vectorizer.TriangleVectorizer;
+import vectorizer.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -28,6 +25,7 @@ public class MainForm {
     private JComboBox<String> cbVectorizerTechnique;
     private JButton btnStart;
     private JButton btnExport;
+    private JButton btnTest;
     private JButton curveEditorButton;
 
     File mainImageFile = new File("photo3.bmp");
@@ -149,6 +147,7 @@ public class MainForm {
                 }
             }
         });
+        /*
         curveEditorButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -158,7 +157,7 @@ public class MainForm {
                 frame.setSize(640,480);
                 frame.setVisible(true);
             }
-        });
+        });*/
         slider1.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -166,6 +165,15 @@ public class MainForm {
                     int x = slider1.getValue();
                     currentVectorizer.threshold = x;
                     currentVectorizer.startJob();
+                }
+            }
+        });
+        btnTest.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentVectorizer!=null){
+                    BenchmarkTool benchmarkTool = new BenchmarkTool();
+                    benchmarkTool.test(currentVectorizer);
                 }
             }
         });

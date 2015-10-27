@@ -65,10 +65,10 @@
               <model/>
             </properties>
           </component>
-          <component id="edce3" class="javax.swing.JButton" binding="curveEditorButton" default-binding="true">
+          <component id="32fb2" class="javax.swing.JButton" binding="btnTest">
             <constraints/>
             <properties>
-              <text value="Curve Editor"/>
+              <text value="Test"/>
             </properties>
           </component>
         </children>
