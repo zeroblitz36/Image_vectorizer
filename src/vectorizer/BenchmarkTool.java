@@ -10,35 +10,40 @@ import java.io.ByteArrayOutputStream;
  */
 public class BenchmarkTool {
     private boolean isCanceled = false;
+    private int originalColors[];
+    private int destinationColors[];
+    private int w,h;
     public void test(BaseVectorizer vectorizer){
-        int svgSize,svgzSize;
-        String svg,svgz;
+        int svgSize=-1,svgzSize=-1;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         float perc;
         String results = "Threshold SvgSize SvgzSize Percentage\n";
 
+        originalColors = new int[vectorizer.area];
+        destinationColors = new int[vectorizer.area];
+        w = vectorizer.w;
+        h = vectorizer.h;
+        vectorizer.originalImage.getRGB(0,0,w,h,originalColors,0,w);
         for(int i=0;i<=512 && !isCanceled();i++){
             vectorizer.threshold = i;
+            vectorizer.isInBenchmark = true;
             vectorizer.startJob();
-            while(vectorizer.isAJobRunning()){
-                try {
-                    Thread.sleep(16);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            while(!vectorizer.isDone()){
+                Thread.yield();
             }
-            baos.reset();
+            vectorizer.destImage.getRGB(0,0,w,h,destinationColors,0,w);
+            /*baos.reset();
             vectorizer.exportToSVG(baos,false);
-            svg = baos.toString();
-            svgSize = svg.length();
+            svgSize = baos.size();
             baos.reset();
             vectorizer.exportToSVG(baos,true);
-            svgz = baos.toString();
-            svgzSize = svgz.length();
+            svgzSize = baos.size();*/
 
             perc = calculateComparison(vectorizer) * 100;
 
-            results += String.format("%d\t%d\t%d\t%.3f\n",i,svgSize,svgzSize,perc);
+            String s = String.format("%10d%10d%10d\t%10.3f\n",i,svgSize,svgzSize,perc);
+            System.out.print(s);
+            results += s;
             System.out.format("Progress... %d out of 512\n",i);
         }
 
@@ -46,19 +51,12 @@ public class BenchmarkTool {
     }
 
     private float calculateComparison(BaseVectorizer vectorizer){
-        BufferedImage orig = vectorizer.originalImage;
-        BufferedImage dest = vectorizer.destImage;
-        int width = orig.getWidth();
-        int height = orig.getHeight();
-        int a,b;
+        int area = w*h;
         int total=0;
-        for(int i=0;i<height;i++)
-            for(int j=0;j<width;j++){
-                a = orig.getRGB(j,i);
-                b = dest.getRGB(j,i);
-                total += Utility.manhattanDistance(a,b);
-            }
-        float percentage = 1 - 1.f * total / (width*height*255*3);
+        for(int i=0;i<area;i++) {
+            total += Utility.manhattanDistance(originalColors[i], destinationColors[i]);
+        }
+        float percentage = 1 - 1.f * total / (area*255*3);
         return percentage;
     }
 

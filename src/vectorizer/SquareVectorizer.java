@@ -23,6 +23,7 @@ public class SquareVectorizer extends BaseVectorizer{
                     e.printStackTrace();
                 }
             }
+            setIsDone(false);
             lastJob = new Job();
             lastJob.start();
         }
@@ -37,28 +38,32 @@ public class SquareVectorizer extends BaseVectorizer{
                     e.printStackTrace();
                 }
             }
+            setIsDone(true);
         }
     }
 
     public void drawFunction(ArrayList<SquareFragment> list){
-        if(destImage!=null) {
-            BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
-            Graphics2D g = image.createGraphics();
+        if(destImage!=null || isInBenchmark) {
+            //BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
+            Graphics2D g = destImage.createGraphics();
+            g.setColor(Color.WHITE);
             for (SquareFragment s : list) {
                 g.setColor(new Color(s.color));
                 g.fillRect(s.l, s.t, s.r - s.l + 1, s.d - s.t + 1);
             }
-            int size = 32;
-            Font myFont = new Font("Serif",Font.BOLD, size);
-            g.setFont(myFont);
-            g.setColor(Color.RED);
-            g.drawString("SVG: "+svgStringBuilder.length() + " B",1,size+1);
-            //get compressed size
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(size/2);
-            exportToSVG(baos, true);
-            int compressedSize = baos.size();
-            g.drawString("SVGZ: "+compressedSize+" B",1,2*size + 2);
-            destImagePanel.setImage(image);
+            if(!isInBenchmark) {
+                int size = 32;
+                Font myFont = new Font("Serif", Font.BOLD, size);
+                g.setFont(myFont);
+                g.setColor(Color.RED);
+                g.drawString("SVG: " + svgStringBuilder.length() + " B", 1, size + 1);
+                //get compressed size
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(size / 2);
+                exportToSVG(baos, true);
+                int compressedSize = baos.size();
+                g.drawString("SVGZ: " + compressedSize + " B", 1, 2 * size + 2);
+                destImagePanel.setImage(destImage);
+            }
         }
     }
 
@@ -121,6 +126,7 @@ public class SquareVectorizer extends BaseVectorizer{
             if (canceled) return;
             constructStringSVG();
             drawFunction(lastSavedSquareList);
+            setIsDone(true);
         }
 
         private void recFragCheck(SquareFragment s,Collection<SquareFragment> localFragList) {

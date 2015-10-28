@@ -24,17 +24,20 @@ public class PolygonVectorizer extends BaseVectorizer {
 
 
     private void drawFunctionSequentcial(ArrayList<ColoredPolygon> coloredPolygonList){
-        if(destImagePanel==null)return;
-        Graphics2D g = destImage.createGraphics();
-        g.setStroke(new BasicStroke(0.5f));
-        for (ColoredPolygon c : coloredPolygonList) {
-            g.setColor(new Color(c.color));
-            g.fill(c.getPath());
+        if(destImagePanel!=null || isInBenchmark) {
+            Graphics2D g = destImage.createGraphics();
+            g.setStroke(new BasicStroke(0.5f));
+            for (ColoredPolygon c : coloredPolygonList) {
+                g.setColor(new Color(c.color));
+                g.fill(c.getPath());
+            }
+            if(!isInBenchmark) {
+                destImagePanel.setImage(destImage);
+            }
         }
-        destImagePanel.setImage(destImage);
     }
     private void drawFunction(ArrayList<ColoredPolygon> coloredPolygonList){
-        if(destImagePanel!=null) {
+        if(destImagePanel!=null || isInBenchmark) {
             Graphics2D g = destImage.createGraphics();
             g.setColor(Color.WHITE);
             g.fillRect(0, 0, w - 1, h - 1);
@@ -43,18 +46,20 @@ public class PolygonVectorizer extends BaseVectorizer {
                 g.setColor(new Color(c.color));
                 g.fill(c.getPath());
             }
-            int size = 32;
-            Font myFont = new Font("Serif",Font.BOLD, size);
-            g.setFont(myFont);
-            g.setColor(Color.RED);
-            g.drawString("SVG: "+svgStringBuilder.length() + " B",1,size+1);
+            if(!isInBenchmark) {
+                int size = 32;
+                Font myFont = new Font("Serif", Font.BOLD, size);
+                g.setFont(myFont);
+                g.setColor(Color.RED);
+                g.drawString("SVG: " + svgStringBuilder.length() + " B", 1, size + 1);
 
-            //get compressed size
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(size/2);
-            exportToSVG(baos,true);
-            int compressedSize = baos.size();
-            g.drawString("SVGZ: "+compressedSize+" B",1,2*size + 2);
-            destImagePanel.setImage(destImage);
+                //get compressed size
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(size / 2);
+                exportToSVG(baos, true);
+                int compressedSize = baos.size();
+                g.drawString("SVGZ: " + compressedSize + " B", 1, 2 * size + 2);
+                destImagePanel.setImage(destImage);
+            }
         }
     }
     private class Job extends JobThread{
@@ -118,7 +123,7 @@ public class PolygonVectorizer extends BaseVectorizer {
             exportSvgTime = System.currentTimeMillis()-exportSvgTime;
 
             drawFunction(lastSavedPolygonList);
-
+            setIsDone(true);
             System.out.format("workMatrixResetTime = %d\n" +
                             "coverSearchTime = %d\n" +
                             "perimeterSearchTime = %d\n" +
@@ -339,6 +344,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                     e.printStackTrace();
                 }
             }
+            setIsDone(false);
             lastJob = new Job();
             lastJob.start();
         }
@@ -353,6 +359,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                     e.printStackTrace();
                 }
             }
+            setIsDone(true);
         }
     }
 

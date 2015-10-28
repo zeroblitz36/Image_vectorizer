@@ -28,6 +28,7 @@ public class TriangleVectorizer extends BaseVectorizer{
                     e.printStackTrace();
                 }
             }
+            setIsDone(false);
             lastJob = new Job();
             lastJob.start();
         }
@@ -42,29 +43,32 @@ public class TriangleVectorizer extends BaseVectorizer{
                     e.printStackTrace();
                 }
             }
+            setIsDone(true);
         }
     }
 
     private void drawTriangles(ArrayList<Triangle> list){
-        if(destImagePanel!=null){
+        if(destImagePanel!=null || isInBenchmark){
             Graphics2D g = destImage.createGraphics();
             for(Triangle t:list){
                 g.setColor(new Color(t.color));
                 g.fill(t.getClonePath());
             }
-            int size = 32;
-            Font myFont = new Font("Serif",Font.BOLD, size);
-            g.setFont(myFont);
-            g.setColor(Color.RED);
-            g.drawString("SVG: "+svgStringBuilder.length() + " B",1,size+1);
+            if(!isInBenchmark) {
+                int size = 32;
+                Font myFont = new Font("Serif", Font.BOLD, size);
+                g.setFont(myFont);
+                g.setColor(Color.RED);
+                g.drawString("SVG: " + svgStringBuilder.length() + " B", 1, size + 1);
 
-            //get compressed size
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(size/2);
-            exportToSVG(baos, true);
-            int compressedSize = baos.size();
-            g.drawString("SVGZ: "+compressedSize+" B",1,2*size + 2);
+                //get compressed size
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(size / 2);
+                exportToSVG(baos, true);
+                int compressedSize = baos.size();
+                g.drawString("SVGZ: " + compressedSize + " B", 1, 2 * size + 2);
 
-            destImagePanel.setImage(destImage);
+                destImagePanel.setImage(destImage);
+            }
         }
     }
 
@@ -98,6 +102,7 @@ public class TriangleVectorizer extends BaseVectorizer{
             lastSavedTriangleList = triangles;
             constructStringSVG();
             drawTriangles(triangles);
+            setIsDone(true);
         }
 
         public void recTriangulation(Triangle triangle,ArrayList<Triangle> triangles){

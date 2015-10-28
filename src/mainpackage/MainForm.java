@@ -103,6 +103,7 @@ public class MainForm {
                 if (currentVectorizer != null) {
                     int x = slider1.getValue();
                     currentVectorizer.threshold = x;
+                    currentVectorizer.isInBenchmark = false;
                     currentVectorizer.startJob();
                 }
             }
@@ -164,6 +165,7 @@ public class MainForm {
                 if(currentVectorizer!=null) {
                     int x = slider1.getValue();
                     currentVectorizer.threshold = x;
+                    currentVectorizer.isInBenchmark = false;
                     currentVectorizer.startJob();
                 }
             }
@@ -172,8 +174,13 @@ public class MainForm {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(currentVectorizer!=null){
-                    BenchmarkTool benchmarkTool = new BenchmarkTool();
-                    benchmarkTool.test(currentVectorizer);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            BenchmarkTool benchmarkTool = new BenchmarkTool();
+                            benchmarkTool.test(currentVectorizer);
+                        }
+                    }).start();
                 }
             }
         });
