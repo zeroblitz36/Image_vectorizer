@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.zip.GZIPOutputStream;
 
 public class PolygonVectorizer extends BaseVectorizer {
     private StaticPointArray list;
@@ -380,5 +381,16 @@ public class PolygonVectorizer extends BaseVectorizer {
             svgStringBuilder.append(String.format("' style='fill:#%06X'/>\n",c.color&0xffffff));
         }
         svgStringBuilder.append("</svg>");
+
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(svgStringBuilder.length());
+            GZIPOutputStream gzos = new GZIPOutputStream(baos,true);
+            gzos.write(svgStringBuilder.toString().getBytes());
+            gzos.flush();
+            svgzStringBuilder.setLength(0);
+            svgzStringBuilder.append(baos.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

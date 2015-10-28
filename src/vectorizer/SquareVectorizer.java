@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 public class SquareVectorizer extends BaseVectorizer{
     private ArrayList<SquareFragment> lastSavedSquareList;
@@ -209,5 +210,16 @@ public class SquareVectorizer extends BaseVectorizer{
                     sf.color&0xffffff));
         }
         svgStringBuilder.append("</svg>");
+
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(svgStringBuilder.length());
+            GZIPOutputStream gzos = new GZIPOutputStream(baos,true);
+            gzos.write(svgStringBuilder.toString().getBytes());
+            gzos.flush();
+            svgzStringBuilder.setLength(0);
+            svgzStringBuilder.append(baos.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

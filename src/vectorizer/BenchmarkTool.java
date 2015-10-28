@@ -17,8 +17,9 @@ public class BenchmarkTool {
         int svgSize=-1,svgzSize=-1;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         float perc;
-        String results = "Threshold SvgSize SvgzSize Percentage\n";
-
+        float time;
+        String results = "Threshold,Time,SvgSize,SvgzSize,Percentage\n";
+        long start,end;
         originalColors = new int[vectorizer.area];
         destinationColors = new int[vectorizer.area];
         w = vectorizer.w;
@@ -27,21 +28,36 @@ public class BenchmarkTool {
         for(int i=0;i<=512 && !isCanceled();i++){
             vectorizer.threshold = i;
             vectorizer.isInBenchmark = true;
+            start = System.currentTimeMillis();
             vectorizer.startJob();
             while(!vectorizer.isDone()){
                 Thread.yield();
             }
+            end = System.currentTimeMillis();
+            time = (end-start)/1000.f;
+            System.out.printf("Vectorization :%.3fs\n",time);
+
+            start = System.currentTimeMillis();
             vectorizer.destImage.getRGB(0,0,w,h,destinationColors,0,w);
-            /*baos.reset();
-            vectorizer.exportToSVG(baos,false);
-            svgSize = baos.size();
-            baos.reset();
-            vectorizer.exportToSVG(baos,true);
-            svgzSize = baos.size();*/
+            end = System.currentTimeMillis();
+            System.out.printf("Conversion :%.3fs\n",(end-start)/1000.f);
 
+            start = System.currentTimeMillis();
+            //baos.reset();
+            //vectorizer.exportToSVG(baos,false);
+            svgSize = vectorizer.getSvgSize();
+            //baos.reset();
+            //vectorizer.exportToSVG(baos,true);
+            svgzSize = vectorizer.getSvgzSize();
+            end = System.currentTimeMillis();
+            System.out.printf("FileSize :%.3fs\n",(end-start)/1000.f);
+
+            start = System.currentTimeMillis();
             perc = calculateComparison(vectorizer) * 100;
+            end = System.currentTimeMillis();
+            System.out.printf("Comparison :%.3fs\n",(end-start)/1000.f);
 
-            String s = String.format("%10d%10d%10d\t%10.3f\n",i,svgSize,svgzSize,perc);
+            String s = String.format("%d,%.3f,%d,%d,%.3f\n",i,time,svgSize,svgzSize,perc);
             System.out.print(s);
             results += s;
             System.out.format("Progress... %d out of 512\n",i);

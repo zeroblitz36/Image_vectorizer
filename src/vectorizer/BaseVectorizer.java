@@ -21,6 +21,7 @@ public abstract class BaseVectorizer {
     protected JobThread lastJob;
     protected final Object jobLock=new Object();
     protected StringBuilder svgStringBuilder = new StringBuilder(2000000);
+    protected StringBuilder svgzStringBuilder = new StringBuilder(2000000);
     private boolean isDone = false;
     public boolean isInBenchmark=false;
 
@@ -130,5 +131,13 @@ public abstract class BaseVectorizer {
 
     public synchronized void setIsDone(boolean isDone) {
         this.isDone = isDone;
+    }
+
+    public int getSvgSize(){
+        return svgStringBuilder.length();
+    }
+
+    public int getSvgzSize(){
+        return svgzStringBuilder.length();
     }
 }

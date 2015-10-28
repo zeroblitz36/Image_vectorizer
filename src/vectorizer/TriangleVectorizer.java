@@ -9,6 +9,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
+import java.util.zip.GZIPOutputStream;
+
 public class TriangleVectorizer extends BaseVectorizer{
 
     private Random random = new Random(System.currentTimeMillis());
@@ -250,5 +252,17 @@ public class TriangleVectorizer extends BaseVectorizer{
         }
         svgStringBuilder.append("</g>\n");
         svgStringBuilder.append("</svg>");
+
+
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(svgStringBuilder.length());
+            GZIPOutputStream gzos = new GZIPOutputStream(baos,true);
+            gzos.write(svgStringBuilder.toString().getBytes());
+            gzos.flush();
+            svgzStringBuilder.setLength(0);
+            svgzStringBuilder.append(baos.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
