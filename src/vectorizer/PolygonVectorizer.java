@@ -123,7 +123,7 @@ public class PolygonVectorizer extends BaseVectorizer {
             constructStringSVG();
             exportSvgTime = System.currentTimeMillis()-exportSvgTime;
 
-            drawFunction(lastSavedPolygonList);
+            //drawFunction(lastSavedPolygonList);
             setIsDone(true);
             System.out.format("workMatrixResetTime = %d\n" +
                             "coverSearchTime = %d\n" +
