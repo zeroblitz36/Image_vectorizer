@@ -87,7 +87,7 @@ public class StaticPointArray implements Serializable{
 
     public void copyFrom(StaticPointArray spa){
         count = spa.count;
-        size = spa.size;
+        if(count >= size)throw new RuntimeException("There is not enough space to copy "+count+" into "+size);
         for(int i=0;i<count;i++){
             pointArrayX[i] = spa.pointArrayX[i];
             pointArrayY[i] = spa.pointArrayY[i];
