@@ -32,6 +32,36 @@ public class PolygonVectorizer extends BaseVectorizer {
     private char workMatrix[];
     private LinkedList<ColoredPolygon> coloredPolygons = new LinkedList<>();
 
+    public void startJob(){
+        synchronized (jobLock) {
+            if (lastJob != null) {
+                lastJob.setCanceled(true);
+                try {
+                    lastJob.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            setIsDone(false);
+            lastJob = new Job();
+            aproxCompletedPixelCount.set(0);
+            lastJob.start();
+        }
+    }
+    public void cancelLastJob(){
+        synchronized (jobLock){
+            if (lastJob != null) {
+                lastJob.setCanceled(true);
+                try {
+                    lastJob.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            setIsDone(true);
+        }
+    }
+
     private void drawFunctionSequentcial(AbstractList<ColoredPolygon> coloredPolygonList){
         if(destImagePanel!=null || isInBenchmark) {
             Graphics2D g = destImage.createGraphics();
@@ -56,7 +86,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                 g.fill(c.getPath());
             }
             if(!isInBenchmark) {
-                int size = 32;
+                /*int size = 32;
                 Font myFont = new Font("Serif", Font.BOLD, size);
                 g.setFont(myFont);
                 g.setColor(Color.RED);
@@ -66,7 +96,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                 //ByteArrayOutputStream baos = new ByteArrayOutputStream(size / 2);
                 //exportToSVG(baos, true);
                 //int compressedSize = baos.size();
-                g.drawString("SVGZ: " + svgzStringBuilder.length() + " B", 1, 2 * size + 2);
+                g.drawString("SVGZ: " + svgzStringBuilder.length() + " B", 1, 2 * size + 2);*/
                 destImagePanel.setImage(destImage);
             }
         }
@@ -122,6 +152,8 @@ public class PolygonVectorizer extends BaseVectorizer {
                         localList.clear();
                     }*/
                 }
+                int k = aproxCompletedPixelCount.addAndGet(w);
+                updateDetails(String.format("Progress : %.1f%%", 100.f * k / area));
             }
 
             if(canceled)return;
@@ -133,13 +165,25 @@ public class PolygonVectorizer extends BaseVectorizer {
             }
 
             if(canceled)return;
-            exportSvgTime = System.currentTimeMillis();
-            constructStringSVG();
-            exportSvgTime = System.currentTimeMillis()-exportSvgTime;
-
-
+            Thread th = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    exportSvgTime = System.currentTimeMillis();
+                    constructStringSVG();
+                    exportSvgTime = System.currentTimeMillis()-exportSvgTime;
+                    updateDetails(String.format("SVG:%s SVGZ:%s",
+                            Utility.aproximateDataSize(svgStringBuilder.length()),
+                            Utility.aproximateDataSize(svgzStringBuilder.length())));
+                }
+            });
+            th.start();
 
             drawFunction(coloredPolygons);
+            try {
+                th.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             setIsDone(true);
             totalTime = System.currentTimeMillis() - totalTime;
             System.out.format("workMatrixResetTime = %d\n" +
@@ -364,34 +408,7 @@ public class PolygonVectorizer extends BaseVectorizer {
         }
     }
 
-    public void startJob(){
-        synchronized (jobLock) {
-            if (lastJob != null) {
-                lastJob.setCanceled(true);
-                try {
-                    lastJob.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            setIsDone(false);
-            lastJob = new Job();
-            lastJob.start();
-        }
-    }
-    public void cancelLastJob(){
-        synchronized (jobLock){
-            if (lastJob != null) {
-                lastJob.setCanceled(true);
-                try {
-                    lastJob.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            setIsDone(true);
-        }
-    }
+
 
     public void constructStringSVG(){
         Locale.setDefault(Locale.US);

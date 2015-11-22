@@ -3,8 +3,10 @@ package vectorizer;
 import utils.ImagePanel;
 import utils.Utility;
 
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
 public abstract class BaseVectorizer {
@@ -22,6 +24,9 @@ public abstract class BaseVectorizer {
     protected final Object jobLock=new Object();
     protected StringBuilder svgStringBuilder = new StringBuilder(2000000);
     protected StringBuilder svgzStringBuilder = new StringBuilder(2000000);
+    protected JLabel lblDetails;
+    private Object detailsSyncObject = new Object();
+    protected AtomicInteger aproxCompletedPixelCount = new AtomicInteger();
     private boolean isDone = false;
     public boolean isInBenchmark=false;
 
@@ -124,7 +129,18 @@ public abstract class BaseVectorizer {
     }
 
     protected abstract void constructStringSVG();
-
+    public void updateDetails(String s){
+        synchronized (detailsSyncObject){
+            if(lblDetails!=null) {
+                lblDetails.setText(s);
+            }
+        }
+    }
+    public void setDetailsLabel(JLabel label) {
+        synchronized (detailsSyncObject) {
+            lblDetails = label;
+        }
+    }
     public synchronized boolean isDone() {
         return isDone;
     }

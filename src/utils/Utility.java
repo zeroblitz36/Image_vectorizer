@@ -64,4 +64,21 @@ public class Utility {
     public static float interpolate(float a, float b,float x){
         return a + x*(b-a);
     }
+
+    public static String aproximateDataSize(int x) {
+        if(x < 0)
+            return "-1 B";
+
+        if(x<1000)
+            return x+" B";
+
+        if(x<1000000)
+            return String.format("%.2f KB",x/1024.f);
+
+        if(x<1000000000)
+            return String.format("%.2f MB",x/1048576.f);
+
+        return String.format("%.2f GB",x/1073741824.f);
+    }
+
 }

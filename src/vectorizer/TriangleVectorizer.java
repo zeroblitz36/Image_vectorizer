@@ -15,7 +15,6 @@ public class TriangleVectorizer extends BaseVectorizer{
 
     private Random random = new Random(System.currentTimeMillis());
     private ArrayList<Triangle> lastSavedTriangleList = null;
-
     public void setDestImagePanel(ImagePanel p){
         destImagePanel = p;
     }
@@ -32,6 +31,7 @@ public class TriangleVectorizer extends BaseVectorizer{
             }
             setIsDone(false);
             lastJob = new Job();
+            aproxCompletedPixelCount.set(0);
             lastJob.start();
         }
     }
@@ -56,8 +56,9 @@ public class TriangleVectorizer extends BaseVectorizer{
                 g.setColor(new Color(t.color));
                 g.fill(t.getClonePath());
             }
+
             if(!isInBenchmark) {
-                int size = 32;
+                /*int size = 32;
                 Font myFont = new Font("Serif", Font.BOLD, size);
                 g.setFont(myFont);
                 g.setColor(Color.RED);
@@ -68,7 +69,7 @@ public class TriangleVectorizer extends BaseVectorizer{
                 exportToSVG(baos, true);
                 int compressedSize = baos.size();
                 g.drawString("SVGZ: " + compressedSize + " B", 1, 2 * size + 2);
-
+                */
                 destImagePanel.setImage(destImage);
             }
         }
@@ -89,21 +90,35 @@ public class TriangleVectorizer extends BaseVectorizer{
             });
             th.start();
 
-            recTriangulation(t2,triangleArray2);
+            recTriangulation(t2, triangleArray2);
 
             try {
                 th.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            triangles.ensureCapacity(triangleArray1.size()+triangleArray2.size());
+            triangles.ensureCapacity(triangleArray1.size() + triangleArray2.size());
             triangles.addAll(triangleArray1);
             triangles.addAll(triangleArray2);
 
             if(canceled)return;
             lastSavedTriangleList = triangles;
-            constructStringSVG();
+            th = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    constructStringSVG();
+                    updateDetails(String.format("SVG:%s SVGZ:%s",
+                            Utility.aproximateDataSize(svgStringBuilder.length()),
+                            Utility.aproximateDataSize(svgzStringBuilder.length())));
+                }
+            });
+            th.start();
             drawTriangles(triangles);
+            try {
+                th.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             setIsDone(true);
         }
 
@@ -121,87 +136,88 @@ public class TriangleVectorizer extends BaseVectorizer{
             float xMax = triangle.xMax;
             float yMin = triangle.yMin;
             float yMax = triangle.yMax;
-            int rTotal=0,gTotal=0,bTotal=0,count;
+            int rTotal=0,gTotal=0,bTotal=0,count=0;
+            int rMed=0,gMed=0,bMed=0;
             int m;
 
-            rTotal += redOrig((int)x0,(int)y0);
-            rTotal += redOrig((int)x1,(int)y1);
-            rTotal += redOrig((int)x2,(int)y2);
+            rMed += redOrig((int)x0,(int)y0);
+            rMed += redOrig((int)x1,(int)y1);
+            rMed += redOrig((int)x2,(int)y2);
 
-            bTotal += blueOrig((int) x0, (int) y0);
-            bTotal += blueOrig((int) x1, (int) y1);
-            bTotal += blueOrig((int) x2, (int) y2);
+            bMed += blueOrig((int) x0, (int) y0);
+            bMed += blueOrig((int) x1, (int) y1);
+            bMed += blueOrig((int) x2, (int) y2);
 
-            gTotal += greenOrig((int) x0, (int) y0);
-            gTotal += greenOrig((int) x1, (int) y1);
-            gTotal += greenOrig((int) x2, (int) y2);
+            gMed += greenOrig((int) x0, (int) y0);
+            gMed += greenOrig((int) x1, (int) y1);
+            gMed += greenOrig((int) x2, (int) y2);
 
-            count = 3;
+            rMed/=3;
+            gMed/=3;
+            bMed/=3;
 
             boolean fail = false;
 
-            for(int pass = 0; pass<2 && !fail; pass++) {
-                for (int y = (int) yMin; y <= yMax && !fail; y++) {
-                    flag = 0;
-                    a = 1.f * (y - y0) / (y1 - y0);
-                    flag += ((a >= 0) && (a <= 1)) ? 1 : 0;
+            for (int y = (int) yMin; y <= yMax && !fail; y++) {
+                flag = 0;
+                a = 1.f * (y - y0) / (y1 - y0);
+                flag += ((a >= 0) && (a <= 1)) ? 1 : 0;
 
-                    if (flag == 1) {
-                        i0 = (int) (x0 + (x1 - x0) * a);
-                    }
-
-                    a = 1.f * (y - y1) / (y2 - y1);
-                    flag += ((a >= 0) && (a <= 1)) ? 1 : 0;
-
-                    if (flag == 1) {
-                        i0 = (int) (x1 + (x2 - x1) * a);
-                    } else if (flag == 2) {
-                        i1 = (int) (x1 + (x2 - x1) * a);
-                    }
-
-                    if (flag == 1) {
-                        a = 1.f * (y - y2) / (y0 - y2);
-                        i1 = (int) (x2 + (x0 - x2) * a);
-                    }
-
-                    if (i0 > i1) {
-                        man = i0;
-                        i0 = i1;
-                        i1 = man;
-                    }
-                    i0 = (int) Math.floor(i0);
-                    i1 = (int) Math.ceil(i1);
-                    if(i0 < xMin) i0 = xMin;
-                    if(i1 > xMax) i1 = xMax;
-                    if(canceled)return;
-                    for (int x = (int) i0; x <= i1 && !fail; x++) {
-                        if(canceled)return;
-                        count++;
-                        if(pass == 0) {
-                            rTotal += redOrig(x, y);
-                            gTotal += greenOrig(x, y);
-                            bTotal += blueOrig(x, y);
-                        }else{
-
-                            m = Math.abs(rTotal - redOrig(x, y)) +
-                                    Math.abs(gTotal - greenOrig(x, y)) +
-                                    Math.abs(bTotal - blueOrig(x, y));
-                            if(m > threshold)
-                                fail = true;
-                        }
-                    }
+                if (flag == 1) {
+                    i0 = (int) (x0 + (x1 - x0) * a);
                 }
-                if(pass==0) {
-                    rTotal /= count;
-                    gTotal /= count;
-                    bTotal /= count;
+
+                a = 1.f * (y - y1) / (y2 - y1);
+                flag += ((a >= 0) && (a <= 1)) ? 1 : 0;
+
+                if (flag == 1) {
+                    i0 = (int) (x1 + (x2 - x1) * a);
+                } else if (flag == 2) {
+                    i1 = (int) (x1 + (x2 - x1) * a);
+                }
+
+                if (flag == 1) {
+                    a = 1.f * (y - y2) / (y0 - y2);
+                    i1 = (int) (x2 + (x0 - x2) * a);
+                }
+
+                if (i0 > i1) {
+                    man = i0;
+                    i0 = i1;
+                    i1 = man;
+                }
+                i0 = (int) Math.floor(i0);
+                i1 = (int) Math.ceil(i1);
+                if(i0 < xMin) i0 = xMin;
+                if(i1 > xMax) i1 = xMax;
+                if(canceled)return;
+                for (int x = (int) i0; x <= i1 && !fail; x++) {
+                    if(canceled)return;
+                    count++;
+                    rTotal += redOrig(x, y);
+                    gTotal += greenOrig(x, y);
+                    bTotal += blueOrig(x, y);
+                    m = Math.abs(rMed - redOrig(x, y)) +
+                            Math.abs(gMed - greenOrig(x, y)) +
+                            Math.abs(bMed - blueOrig(x, y));
+                    if(m > threshold)
+                        fail = true;
                 }
             }
+
             if(canceled)return;
-            if(count==0)return;
+            if(count==0)
+                return;
+            else {
+                rTotal /= count;
+                gTotal /= count;
+                bTotal /= count;
+            }
             if(!fail || triangle.area<=3){
                 triangle.color = 0xff000000 | (rTotal<<16) | (gTotal<<8) | bTotal;
                 triangles.add(triangle);
+                int x = aproxCompletedPixelCount.addAndGet((int)Math.ceil(triangle.area * 100));
+                updateDetails(String.format("Progress : %.1f%%",1.f*x/area));
             }else{
 
                 double dist0 = Math.sqrt((x0-x1)*(x0-x1) + (y0-y1)*(y0-y1));

@@ -26,6 +26,7 @@ public class MainForm {
     private JButton btnStart;
     private JButton btnExport;
     private JButton btnTest;
+    private JLabel lblDetails;
     private JButton curveEditorButton;
 
     File mainImageFile = new File("photo3.bmp");
@@ -104,6 +105,7 @@ public class MainForm {
                     int x = slider1.getValue();
                     currentVectorizer.threshold = x;
                     currentVectorizer.isInBenchmark = false;
+                    currentVectorizer.setDetailsLabel(lblDetails);
                     currentVectorizer.startJob();
                 }
             }
@@ -166,6 +168,7 @@ public class MainForm {
                     int x = slider1.getValue();
                     currentVectorizer.threshold = x;
                     currentVectorizer.isInBenchmark = false;
+                    currentVectorizer.setDetailsLabel(lblDetails);
                     currentVectorizer.startJob();
                 }
             }

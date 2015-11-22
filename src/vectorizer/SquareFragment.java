@@ -30,4 +30,9 @@ public class SquareFragment implements Serializable {
     public boolean isValid() {
         return l <= r && t <= d;
     }
+
+    public int area(){
+        return (r-l+1)*(d-t+1);
+    }
+
 }

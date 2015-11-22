@@ -26,6 +26,7 @@ public class SquareVectorizer extends BaseVectorizer{
             }
             setIsDone(false);
             lastJob = new Job();
+            aproxCompletedPixelCount.set(0);
             lastJob.start();
         }
     }
@@ -53,7 +54,7 @@ public class SquareVectorizer extends BaseVectorizer{
                 g.fillRect(s.l, s.t, s.r - s.l + 1, s.d - s.t + 1);
             }
             if(!isInBenchmark) {
-                int size = 32;
+                /*int size = 32;
                 Font myFont = new Font("Serif", Font.BOLD, size);
                 g.setFont(myFont);
                 g.setColor(Color.RED);
@@ -62,7 +63,7 @@ public class SquareVectorizer extends BaseVectorizer{
                 ByteArrayOutputStream baos = new ByteArrayOutputStream(size / 2);
                 exportToSVG(baos, true);
                 int compressedSize = baos.size();
-                g.drawString("SVGZ: " + compressedSize + " B", 1, 2 * size + 2);
+                g.drawString("SVGZ: " + compressedSize + " B", 1, 2 * size + 2);*/
                 destImagePanel.setImage(destImage);
             }
         }
@@ -125,8 +126,22 @@ public class SquareVectorizer extends BaseVectorizer{
             endTime = System.currentTimeMillis();
             lastSavedSquareList = fragList;
             if (canceled) return;
-            constructStringSVG();
+            Thread th = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    constructStringSVG();
+                    updateDetails(String.format("SVG:%s SVGZ:%s",
+                            Utility.aproximateDataSize(svgStringBuilder.length()),
+                            Utility.aproximateDataSize(svgzStringBuilder.length())));
+                }
+            });
+            th.start();
             drawFunction(lastSavedSquareList);
+            try {
+                th.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             setIsDone(true);
         }
 
@@ -171,6 +186,8 @@ public class SquareVectorizer extends BaseVectorizer{
             if (!fail) {
                 s.color = avgColor;
                 localFragList.add(s);
+                int x = aproxCompletedPixelCount.addAndGet(s.area());
+                updateDetails(String.format("Progress : %.1f%%", 100.f * x / area));
             } else {
                 SquareFragment s1 = new SquareFragment();
                 SquareFragment s2 = new SquareFragment();
