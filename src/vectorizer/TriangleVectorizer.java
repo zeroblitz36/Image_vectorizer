@@ -1,13 +1,11 @@
 package vectorizer;
 
-import utils.ImagePanel;
 import utils.Utility;
 
 import java.awt.*;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Random;
 import java.util.zip.GZIPOutputStream;
 
@@ -15,9 +13,6 @@ public class TriangleVectorizer extends BaseVectorizer{
 
     private Random random = new Random(System.currentTimeMillis());
     private ArrayList<Triangle> lastSavedTriangleList = null;
-    public void setDestImagePanel(ImagePanel p){
-        destImagePanel = p;
-    }
 
     public void startJob() {
         synchronized (jobLock) {
@@ -54,22 +49,10 @@ public class TriangleVectorizer extends BaseVectorizer{
             Graphics2D g = destImage.createGraphics();
             for(Triangle t:list){
                 g.setColor(new Color(t.color));
-                g.fill(t.getClonePath());
+                g.fill(t.getPath());
             }
 
             if(!isInBenchmark) {
-                /*int size = 32;
-                Font myFont = new Font("Serif", Font.BOLD, size);
-                g.setFont(myFont);
-                g.setColor(Color.RED);
-                g.drawString("SVG: " + svgStringBuilder.length() + " B", 1, size + 1);
-
-                //get compressed size
-                ByteArrayOutputStream baos = new ByteArrayOutputStream(size / 2);
-                exportToSVG(baos, true);
-                int compressedSize = baos.size();
-                g.drawString("SVGZ: " + compressedSize + " B", 1, 2 * size + 2);
-                */
                 destImagePanel.setImage(destImage);
             }
         }
@@ -250,10 +233,9 @@ public class TriangleVectorizer extends BaseVectorizer{
 
     @Override
     protected void constructStringSVG() {
-        Locale.setDefault(Locale.US);
         svgStringBuilder.setLength(0);
         svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>\n", w, h));
-        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+        DecimalFormat decimalFormat = new DecimalFormat("#.#");
         svgStringBuilder.append(String.format("<g stroke-width='0.5'>\n"));
         for(Triangle t:lastSavedTriangleList){
             svgStringBuilder.append(String.format("<path d='M%s,%sL%s,%sL%s,%sZ' fill='#%06X' stroke='#%06X'/>\n",
@@ -271,8 +253,9 @@ public class TriangleVectorizer extends BaseVectorizer{
 
 
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(svgStringBuilder.length());
-            GZIPOutputStream gzos = new GZIPOutputStream(baos,true);
+            if(gzos==null)
+                gzos = new GZIPOutputStream(baos,true);
+            baos.reset();
             gzos.write(svgStringBuilder.toString().getBytes());
             gzos.flush();
             svgzStringBuilder.setLength(0);

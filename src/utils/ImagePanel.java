@@ -20,7 +20,7 @@ public class ImagePanel extends JPanel implements MouseListener{
     private int threshold = 128;
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+        //super.paintComponent(g);
         g.drawImage(image, 0, 0, getWidth(), getHeight(), null);
     }
 

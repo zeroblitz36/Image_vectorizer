@@ -24,6 +24,8 @@ public abstract class BaseVectorizer {
     protected final Object jobLock=new Object();
     protected StringBuilder svgStringBuilder = new StringBuilder(2000000);
     protected StringBuilder svgzStringBuilder = new StringBuilder(2000000);
+    protected ByteArrayOutputStream baos = new ByteArrayOutputStream(2000000);
+    protected GZIPOutputStream gzos;
     protected JLabel lblDetails;
     private Object detailsSyncObject = new Object();
     protected AtomicInteger aproxCompletedPixelCount = new AtomicInteger();
