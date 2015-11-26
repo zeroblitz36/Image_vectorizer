@@ -5,7 +5,9 @@ import utils.Utility;
 import java.awt.*;
 import java.io.*;
 import java.text.DecimalFormat;
+import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.zip.GZIPOutputStream;
 
@@ -66,8 +68,8 @@ public class TriangleVectorizer extends BaseVectorizer{
             final Triangle t1 = new Triangle(0,0,w-1,0,w-1,h-1);
             final Triangle t2 = new Triangle(0,0,0,h-1,w-1,h-1);
 
-            ArrayList<Triangle> triangleArray1 = new ArrayList<>();
-            ArrayList<Triangle> triangleArray2 = new ArrayList<>();
+            LinkedList<Triangle> triangleArray1 = new LinkedList<>();
+            LinkedList<Triangle> triangleArray2 = new LinkedList<>();
             Thread th = new Thread(() -> {
                 recTriangulation(t1,triangleArray1);
             });
@@ -80,6 +82,7 @@ public class TriangleVectorizer extends BaseVectorizer{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            if(canceled)return;
             triangles.ensureCapacity(triangleArray1.size() + triangleArray2.size());
             triangles.addAll(triangleArray1);
             triangles.addAll(triangleArray2);
@@ -105,7 +108,7 @@ public class TriangleVectorizer extends BaseVectorizer{
             setIsDone(true);
         }
 
-        public void recTriangulation(Triangle triangle,ArrayList<Triangle> triangles){
+        public void recTriangulation(Triangle triangle,AbstractList<Triangle> triangles){
             float i0=0,i1=0,man;
             int flag;
             float a;
@@ -233,6 +236,8 @@ public class TriangleVectorizer extends BaseVectorizer{
 
     @Override
     protected void constructStringSVG() {
+        long time;
+        time = System.currentTimeMillis();
         svgStringBuilder.setLength(0);
         svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>\n", w, h));
         DecimalFormat decimalFormat = new DecimalFormat("#.#");
@@ -250,16 +255,22 @@ public class TriangleVectorizer extends BaseVectorizer{
         }
         svgStringBuilder.append("</g>\n");
         svgStringBuilder.append("</svg>");
-
+        System.out.printf("SVG time = %.3fs\n",(System.currentTimeMillis()-time)/1000.f);
 
         try {
             if(gzos==null)
                 gzos = new GZIPOutputStream(baos,true);
             baos.reset();
+            time = System.currentTimeMillis();
             gzos.write(svgStringBuilder.toString().getBytes());
+            System.out.printf("SVGZ gzos write time = %.3fs\n", (System.currentTimeMillis() - time) / 1000.f);
+            time = System.currentTimeMillis();
             gzos.flush();
+            System.out.printf("SVG gzos flush = %.3fs\n", (System.currentTimeMillis() - time) / 1000.f);
             svgzStringBuilder.setLength(0);
+            time = System.currentTimeMillis();
             svgzStringBuilder.append(baos.toString());
+            System.out.printf("SVG final write = %.3fs\n", (System.currentTimeMillis() - time) / 1000.f);
         } catch (IOException e) {
             e.printStackTrace();
         }
