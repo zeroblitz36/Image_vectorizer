@@ -46,24 +46,12 @@ public class SquareVectorizer extends BaseVectorizer{
 
     public void drawFunction(ArrayList<SquareFragment> list){
         if(destImage!=null || isInBenchmark) {
-            //BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
             Graphics2D g = destImage.createGraphics();
-            g.setColor(Color.WHITE);
             for (SquareFragment s : list) {
                 g.setColor(new Color(s.color));
                 g.fillRect(s.l, s.t, s.r - s.l + 1, s.d - s.t + 1);
             }
             if(!isInBenchmark) {
-                /*int size = 32;
-                Font myFont = new Font("Serif", Font.BOLD, size);
-                g.setFont(myFont);
-                g.setColor(Color.RED);
-                g.drawString("SVG: " + svgStringBuilder.length() + " B", 1, size + 1);
-                //get compressed size
-                ByteArrayOutputStream baos = new ByteArrayOutputStream(size / 2);
-                exportToSVG(baos, true);
-                int compressedSize = baos.size();
-                g.drawString("SVGZ: " + compressedSize + " B", 1, 2 * size + 2);*/
                 destImagePanel.setImage(destImage);
             }
         }
@@ -215,7 +203,6 @@ public class SquareVectorizer extends BaseVectorizer{
 
     @Override
     protected void constructStringSVG() {
-        Locale.setDefault(Locale.US);
         svgStringBuilder.setLength(0);
         svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>\n", w, h));
         for(SquareFragment sf : lastSavedSquareList) {
@@ -229,8 +216,9 @@ public class SquareVectorizer extends BaseVectorizer{
         svgStringBuilder.append("</svg>");
 
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(svgStringBuilder.length());
-            GZIPOutputStream gzos = new GZIPOutputStream(baos,true);
+            if(gzos==null)
+                gzos = new GZIPOutputStream(baos,true);
+            baos.reset();
             gzos.write(svgStringBuilder.toString().getBytes());
             gzos.flush();
             svgzStringBuilder.setLength(0);
