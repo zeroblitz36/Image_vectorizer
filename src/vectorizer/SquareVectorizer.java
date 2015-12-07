@@ -96,16 +96,17 @@ public class SquareVectorizer extends BaseVectorizer{
             t3.start();
             if (s4.isValid()) recFragCheck(s4,fragList4);
             if(canceled) return;
-            fragList.addAll(fragList4);
             try {
                 t1.join();
-                fragList.addAll(fragList1);
-                if(canceled) return;
                 t2.join();
-                fragList.addAll(fragList2);
-                if(canceled) return;
                 t3.join();
+                if(canceled)return;
+                fragList.ensureCapacity(fragList1.size()+fragList2.size()+
+                fragList3.size()+fragList4.size());
+                fragList.addAll(fragList1);
+                fragList.addAll(fragList2);
                 fragList.addAll(fragList3);
+                fragList.addAll(fragList4);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
