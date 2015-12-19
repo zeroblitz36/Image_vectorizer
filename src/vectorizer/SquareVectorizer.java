@@ -102,7 +102,7 @@ public class SquareVectorizer extends BaseVectorizer{
                 t3.join();
                 if(canceled)return;
                 fragList.ensureCapacity(fragList1.size()+fragList2.size()+
-                fragList3.size()+fragList4.size());
+                        fragList3.size()+fragList4.size());
                 fragList.addAll(fragList1);
                 fragList.addAll(fragList2);
                 fragList.addAll(fragList3);
@@ -135,44 +135,25 @@ public class SquareVectorizer extends BaseVectorizer{
         }
 
         private void recFragCheck(SquareFragment s,Collection<SquareFragment> localFragList) {
-            int rTotal = 0, gTotal = 0, bTotal = 0, count = 0, color;
-            int r, g, b;
-            int t, min = 9999, max = -9999;
+            int rTotal, gTotal, bTotal, avgColor;
+            rTotal=(redOrig(s.l,s.t)+redOrig(s.r,s.t)+redOrig(s.l,s.d)+redOrig(s.r,s.d))/4;
+            gTotal=(greenOrig(s.l, s.t)+greenOrig(s.r, s.t)+greenOrig(s.l, s.d)+greenOrig(s.r, s.d))/4;
+            bTotal=(blueOrig(s.l, s.t)+blueOrig(s.r, s.t)+blueOrig(s.l, s.d)+blueOrig(s.r, s.d))/4;
+            avgColor = 0xff000000 | (rTotal << 16) | (gTotal << 8) | bTotal;
 
             boolean fail = false;
-
+            rTotal = 0; gTotal = 0; bTotal = 0;
             for (int y = s.t; y <= s.d && !fail; y++)
                 for (int x = s.l; x <= s.r && !fail; x++) {
                     if (canceled) return;
-                    count++;
-
-                    r = redOrig(x,y);
-                    g = greenOrig(x,y);
-                    b = blueOrig(x,y);
-                    t = r + g + b;
-                    bTotal += b;
-                    gTotal += g;
-                    rTotal += r;
-
-                    if (t < min) min = t;
-                    if (t > max) max = t;
-
-                    if (max - min > threshold) {
-                        fail = true;
-                    }
-                }
-            rTotal /= count;
-            gTotal /= count;
-            bTotal /= count;
-            int avgColor = 0xff000000 | (rTotal << 16) | (gTotal << 8) | bTotal;
-            for (int y = s.t; y <= s.d && !fail; y++)
-                for (int x = s.l; x <= s.r && !fail; x++) {
-                    if (canceled) return;
-                    color = colorOrig(x, y);
-                    if (Utility.manhattanDistance(color, avgColor) > threshold)
+                    rTotal += redOrig(x,y); gTotal += greenOrig(x, y); bTotal += blueOrig(x,y);
+                    if (Utility.manhattanDistance(colorOrig(x, y), avgColor) > threshold)
                         fail = true;
                 }
             if (!fail) {
+                int count = (s.d-s.t+1)*(s.r-s.l+1);
+                rTotal /= count; bTotal /= count; gTotal /= count;
+                avgColor = 0xff000000 | (rTotal << 16) | (gTotal << 8) | bTotal;
                 s.color = avgColor;
                 localFragList.add(s);
                 int x = aproxCompletedPixelCount.addAndGet(s.area());

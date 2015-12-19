@@ -150,17 +150,6 @@ public class MainForm {
                 }
             }
         });
-        /*
-        curveEditorButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFrame frame = new JFrame("Curve Editor");
-                frame.setContentPane(new BSplineEditor().mainPanel);
-                frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                frame.setSize(640,480);
-                frame.setVisible(true);
-            }
-        });*/
         slider1.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
