@@ -379,7 +379,6 @@ public class PolygonVectorizer extends BaseVectorizer {
 
 
     public void constructStringSVG(){
-        Locale.setDefault(Locale.US);
         svgStringBuilder.setLength(0);
         svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
         for(ColoredPolygon c : coloredPolygons){
@@ -397,8 +396,9 @@ public class PolygonVectorizer extends BaseVectorizer {
         svgStringBuilder.append("</svg>");
 
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(svgStringBuilder.length());
-            GZIPOutputStream gzos = new GZIPOutputStream(baos,true);
+            if(gzos==null)
+                gzos = new GZIPOutputStream(baos,true);
+            baos.reset();
             gzos.write(svgStringBuilder.toString().getBytes());
             gzos.flush();
             svgzStringBuilder.setLength(0);
