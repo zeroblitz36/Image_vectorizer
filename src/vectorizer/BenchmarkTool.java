@@ -2,9 +2,6 @@ package vectorizer;
 
 import utils.Utility;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-
 /**
  * Created by Zero on 27.10.2015.
  */
@@ -14,8 +11,7 @@ public class BenchmarkTool {
     private int destinationColors[];
     private int w,h;
     public void test(BaseVectorizer vectorizer){
-        int svgSize=-1,svgzSize=-1;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int svgSize,svgzSize;
         float perc;
         float time;
         String results = "Threshold,Time,SvgSize,SvgzSize,Percentage\n";
@@ -43,17 +39,13 @@ public class BenchmarkTool {
             System.out.printf("Conversion :%.3fs\n",(end-start)/1000.f);
 
             start = System.currentTimeMillis();
-            //baos.reset();
-            //vectorizer.exportToSVG(baos,false);
             svgSize = vectorizer.getSvgSize();
-            //baos.reset();
-            //vectorizer.exportToSVG(baos,true);
             svgzSize = vectorizer.getSvgzSize();
             end = System.currentTimeMillis();
             System.out.printf("FileSize :%.3fs\n",(end-start)/1000.f);
 
             start = System.currentTimeMillis();
-            perc = calculateComparison(vectorizer) * 100;
+            perc = calculateComparison() * 100;
             end = System.currentTimeMillis();
             System.out.printf("Comparison :%.3fs\n",(end-start)/1000.f);
 
@@ -66,14 +58,13 @@ public class BenchmarkTool {
         System.out.println(results);
     }
 
-    private float calculateComparison(BaseVectorizer vectorizer){
+    private float calculateComparison(){
         int area = w*h;
         int total=0;
         for(int i=0;i<area;i++) {
             total += Utility.manhattanDistance(originalColors[i], destinationColors[i]);
         }
-        float percentage = 1 - 1.f * total / (area*255*3);
-        return percentage;
+        return 1 - 1.f * total / (area*255*3);
     }
 
     public synchronized boolean isCanceled() {

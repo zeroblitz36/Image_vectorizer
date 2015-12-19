@@ -89,14 +89,11 @@ public class TriangleVectorizer extends BaseVectorizer{
 
             if(canceled)return;
             lastSavedTriangleList = triangles;
-            th = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    constructStringSVG();
-                    updateDetails(String.format("SVG:%s SVGZ:%s",
-                            Utility.aproximateDataSize(svgStringBuilder.length()),
-                            Utility.aproximateDataSize(svgzStringBuilder.length())));
-                }
+            th = new Thread(() -> {
+                constructStringSVG();
+                updateDetails(String.format("SVG:%s SVGZ:%s",
+                        Utility.aproximateDataSize(svgStringBuilder.length()),
+                        Utility.aproximateDataSize(svgzStringBuilder.length())));
             });
             th.start();
             drawTriangles(triangles);
@@ -236,7 +233,7 @@ public class TriangleVectorizer extends BaseVectorizer{
         svgStringBuilder.setLength(0);
         svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>\n", w, h));
         DecimalFormat decimalFormat = new DecimalFormat("#.#");
-        svgStringBuilder.append(String.format("<g stroke-width='0.5'>\n"));
+        svgStringBuilder.append("<g stroke-width='0.5'>\n");
         for(Triangle t:lastSavedTriangleList){
             svgStringBuilder.append(String.format("<path d='M%s,%sL%s,%sL%s,%sZ' fill='#%06X' stroke='#%06X'/>\n",
                     decimalFormat.format(t.x0),

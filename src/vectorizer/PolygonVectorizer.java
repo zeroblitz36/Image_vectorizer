@@ -1,6 +1,5 @@
 package vectorizer;
 
-import com.sun.deploy.util.ArrayUtil;
 import utils.StaticPointArray;
 import utils.Utility;
 
@@ -86,24 +85,12 @@ public class PolygonVectorizer extends BaseVectorizer {
                 g.fill(c.getPath());
             }
             if(!isInBenchmark) {
-                /*int size = 32;
-                Font myFont = new Font("Serif", Font.BOLD, size);
-                g.setFont(myFont);
-                g.setColor(Color.RED);
-                g.drawString("SVG: " + svgStringBuilder.length() + " B", 1, size + 1);
-
-                //get compressed size
-                //ByteArrayOutputStream baos = new ByteArrayOutputStream(size / 2);
-                //exportToSVG(baos, true);
-                //int compressedSize = baos.size();
-                g.drawString("SVGZ: " + svgzStringBuilder.length() + " B", 1, 2 * size + 2);*/
                 destImagePanel.setImage(destImage);
             }
         }
     }
     private class Job extends JobThread{
 
-        boolean notDebug = true;
         private long startTime,endTime;
         private long workMatrixResetTime,coverSearchTime,perimeterSearchTime,workMatrixTransferTime,totalTime;
         private long exportSvgTime;
@@ -130,27 +117,15 @@ public class PolygonVectorizer extends BaseVectorizer {
 
             short x0,y0;
             int pixel;
-            //boolean flag;
-            long timeOfLastUpdate = System.currentTimeMillis();
-            //drawFunction();
+
             for(y0=0;y0<h;y0++){
-                //flag = false;
                 for(x0=0;x0<w;x0++){
                     pixel = y0*w+x0;
                     if(canceled)return;
                     if (visitMatrix[pixel] == 0) {
-                        //flag = true;
                         ColoredPolygon coloredPolygon = findShape(x0,y0);
                         localList.add(coloredPolygon);
                     }
-                    /*if(System.currentTimeMillis()-timeOfLastUpdate>16 && localList.size()>0)
-                    {
-                        //System.out.printf("Delta time = %d count=%d\n",System.currentTimeMillis()-timeOfLastUpdate,localList.size());
-                        timeOfLastUpdate = System.currentTimeMillis();
-                        drawFunctionSequentcial(localList);
-                        coloredPolygons.addAll(localList);
-                        localList.clear();
-                    }*/
                 }
                 int k = aproxCompletedPixelCount.addAndGet(w);
                 updateDetails(String.format("Progress : %.1f%%", 100.f * k / area));
@@ -158,23 +133,17 @@ public class PolygonVectorizer extends BaseVectorizer {
 
             if(canceled)return;
             if(localList.size()>0) {
-                //System.out.printf("Delta time = %d count=%d\n",System.currentTimeMillis()-timeOfLastUpdate,localList.size());
-                //drawFunctionSequentcial(localList);
                 coloredPolygons.addAll(localList);
-                //drawFunction(coloredPolygons);
             }
 
             if(canceled)return;
-            Thread th = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    exportSvgTime = System.currentTimeMillis();
-                    constructStringSVG();
-                    exportSvgTime = System.currentTimeMillis()-exportSvgTime;
-                    updateDetails(String.format("SVG:%s SVGZ:%s",
-                            Utility.aproximateDataSize(svgStringBuilder.length()),
-                            Utility.aproximateDataSize(svgzStringBuilder.length())));
-                }
+            Thread th = new Thread(() -> {
+                exportSvgTime = System.currentTimeMillis();
+                constructStringSVG();
+                exportSvgTime = System.currentTimeMillis()-exportSvgTime;
+                updateDetails(String.format("SVG:%s SVGZ:%s",
+                        Utility.aproximateDataSize(svgStringBuilder.length()),
+                        Utility.aproximateDataSize(svgzStringBuilder.length())));
             });
             th.start();
 
@@ -350,8 +319,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                 if(done)break;
             }while(!done);
 
-            float comp = (float) Math.sqrt(2);
-            comp = 0.1f;
+            float comp = 0.1f;
             boolean flag = true;
             //list pruning
 

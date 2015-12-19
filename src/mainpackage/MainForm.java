@@ -9,7 +9,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -98,82 +97,68 @@ public class MainForm {
             updateCurrentVectorizer();
         });
         updateCurrentVectorizer();
-        btnStart.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (currentVectorizer != null) {
-                    int x = slider1.getValue();
-                    currentVectorizer.threshold = x;
-                    currentVectorizer.isInBenchmark = false;
-                    currentVectorizer.setDetailsLabel(lblDetails);
-                    currentVectorizer.startJob();
-                }
+        btnStart.addActionListener(e -> {
+            if (currentVectorizer != null) {
+                currentVectorizer.threshold = slider1.getValue();
+                currentVectorizer.isInBenchmark = false;
+                currentVectorizer.setDetailsLabel(lblDetails);
+                currentVectorizer.startJob();
             }
         });
-        btnExport.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (currentVectorizer != null) {
-                    final JFileChooser fc = new JFileChooser("C:\\Vectorizer");
+        btnExport.addActionListener(e -> {
+            if (currentVectorizer != null) {
+                final JFileChooser fc = new JFileChooser("C:\\Vectorizer");
 
-                    fc.setDialogTitle("Export vectorized image");
-                    int returnedValue = fc.showSaveDialog(btnExport);
-                    if (returnedValue == JFileChooser.APPROVE_OPTION) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    File file = fc.getSelectedFile();
-                                    FileOutputStream fos = new FileOutputStream(file);
-                                    DataOutputStream dos = new DataOutputStream(fos);
-                                    System.out.println("Exporting to output stream");
-                                    String fileName = file.getName();
-                                    if (fileName.endsWith(".svg")) {
-                                        currentVectorizer.exportToSVG(dos, false);
-                                    } else if (fileName.endsWith(".svgz")) {
-                                        currentVectorizer.exportToSVG(dos, true);
-                                    } else if (fileName.endsWith(".html")) {
-                                        //currentVectorizer.exportToHTML(dos);
-                                    } else {
-                                        //currentVectorizer.exportToOutputStream(dos);
-                                    }
-                                    System.out.println("Exporting done");
-                                    dos.close();
-                                } catch (FileNotFoundException e1) {
-                                    e1.printStackTrace();
-                                } catch (IOException e1) {
-                                    e1.printStackTrace();
-                                }
-                            }
-                        }).start();
-                    }
-                }
-            }
-        });
-        slider1.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                if(currentVectorizer!=null) {
-                    int x = slider1.getValue();
-                    currentVectorizer.threshold = x;
-                    currentVectorizer.isInBenchmark = false;
-                    currentVectorizer.setDetailsLabel(lblDetails);
-                    currentVectorizer.startJob();
-                }
-            }
-        });
-        btnTest.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(currentVectorizer!=null){
+                fc.setDialogTitle("Export vectorized image");
+                int returnedValue = fc.showSaveDialog(btnExport);
+                if (returnedValue == JFileChooser.APPROVE_OPTION) {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            BenchmarkTool benchmarkTool = new BenchmarkTool();
-                            benchmarkTool.test(currentVectorizer);
+                            try {
+                                File file = fc.getSelectedFile();
+                                FileOutputStream fos = new FileOutputStream(file);
+                                DataOutputStream dos = new DataOutputStream(fos);
+                                System.out.println("Exporting to output stream");
+                                String fileName = file.getName();
+                                if (fileName.endsWith(".svg")) {
+                                    currentVectorizer.exportToSVG(dos, false);
+                                } else if (fileName.endsWith(".svgz")) {
+                                    currentVectorizer.exportToSVG(dos, true);
+                                } else if (fileName.endsWith(".html")) {
+                                    //currentVectorizer.exportToHTML(dos);
+                                } else {
+                                    //currentVectorizer.exportToOutputStream(dos);
+                                }
+                                System.out.println("Exporting done");
+                                dos.close();
+                            } catch (FileNotFoundException e1) {
+                                e1.printStackTrace();
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
                         }
                     }).start();
                 }
+            }
+        });
+        slider1.addChangeListener(e -> {
+            if(currentVectorizer!=null) {
+                currentVectorizer.threshold = slider1.getValue();
+                currentVectorizer.isInBenchmark = false;
+                currentVectorizer.setDetailsLabel(lblDetails);
+                currentVectorizer.startJob();
+            }
+        });
+        btnTest.addActionListener(e -> {
+            if(currentVectorizer!=null){
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        BenchmarkTool benchmarkTool = new BenchmarkTool();
+                        benchmarkTool.test(currentVectorizer);
+                    }
+                }).start();
             }
         });
     }

@@ -3,7 +3,6 @@ package vectorizer;
 import utils.Utility;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
@@ -73,23 +72,14 @@ public class SquareVectorizer extends BaseVectorizer{
             LinkedList<SquareFragment> fragList2 = new LinkedList<>();
             LinkedList<SquareFragment> fragList3 = new LinkedList<>();
             LinkedList<SquareFragment> fragList4 = new LinkedList<>();
-            Thread t1 = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (s1.isValid()) recFragCheck(s1,fragList1);
-                }
+            Thread t1 = new Thread(() -> {
+                if (s1.isValid()) recFragCheck(s1,fragList1);
             });
-            Thread t2 = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (s2.isValid()) recFragCheck(s2,fragList2);
-                }
+            Thread t2 = new Thread(() -> {
+                if (s2.isValid()) recFragCheck(s2,fragList2);
             });
-            Thread t3 = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (s3.isValid()) recFragCheck(s3,fragList3);
-                }
+            Thread t3 = new Thread(() -> {
+                if (s3.isValid()) recFragCheck(s3,fragList3);
             });
             t1.start();
             t2.start();
@@ -115,14 +105,11 @@ public class SquareVectorizer extends BaseVectorizer{
             endTime = System.currentTimeMillis();
             lastSavedSquareList = fragList;
             if (canceled) return;
-            Thread th = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    constructStringSVG();
-                    updateDetails(String.format("SVG:%s SVGZ:%s",
-                            Utility.aproximateDataSize(svgStringBuilder.length()),
-                            Utility.aproximateDataSize(svgzStringBuilder.length())));
-                }
+            Thread th = new Thread(() -> {
+                constructStringSVG();
+                updateDetails(String.format("SVG:%s SVGZ:%s",
+                        Utility.aproximateDataSize(svgStringBuilder.length()),
+                        Utility.aproximateDataSize(svgzStringBuilder.length())));
             });
             th.start();
             drawFunction(lastSavedSquareList);

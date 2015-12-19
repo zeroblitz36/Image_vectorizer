@@ -1,8 +1,6 @@
 package vectorizer;
 
-import java.awt.*;
 import java.awt.geom.Path2D;
-import java.io.DataOutputStream;
 import java.io.Serializable;
 
 public class Triangle implements Serializable{

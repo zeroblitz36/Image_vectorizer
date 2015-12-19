@@ -35,16 +35,6 @@ public abstract class BaseVectorizer {
     public abstract void startJob();
     public abstract void cancelLastJob();
 
-    public boolean isAJobRunning(){
-        synchronized (jobLock){
-            if(lastJob==null)return false;
-            if(!lastJob.isAlive())return false;
-            return true;
-        }
-    }
-    //public abstract void exportToOutputStream(OutputStream os);
-    //public abstract void importFromInputStream(InputStream is);
-    //public abstract void exportToHTML(OutputStream os);
     public void exportToSVG(OutputStream os,boolean isCompressed) {
         if(isCompressed){
             try {
