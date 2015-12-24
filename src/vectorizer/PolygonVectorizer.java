@@ -77,9 +77,6 @@ public class PolygonVectorizer extends BaseVectorizer {
     private void drawFunction(AbstractList<ColoredPolygon> coloredPolygonList){
         if(destImagePanel!=null || isInBenchmark) {
             Graphics2D g = destImage.createGraphics();
-            g.setColor(Color.WHITE);
-            g.fillRect(0, 0, w - 1, h - 1);
-            g.setStroke(new BasicStroke(0.5f));
             for (ColoredPolygon c : coloredPolygonList) {
                 g.setColor(new Color(c.color));
                 g.fill(c.getPath());
@@ -383,15 +380,18 @@ public class PolygonVectorizer extends BaseVectorizer {
         svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
         for(ColoredPolygon c : coloredPolygons){
             StaticPointArray spa = c.pointArray;
-            svgStringBuilder.append("<polyline points='");
-            for(int i=0;i<spa.size();i++){
+            svgStringBuilder.append("<path d='M");
+            int n = spa.size()-1;
+            for(int i=0;i<n;i++){
                 svgStringBuilder.append(spa.getX(i));
                 svgStringBuilder.append(',');
                 svgStringBuilder.append(spa.getY(i));
-                svgStringBuilder.append(' ');
+                svgStringBuilder.append('L');
             }
-            svgStringBuilder.setLength(svgStringBuilder.length()-1);
-            svgStringBuilder.append(String.format("' style='fill:#%06X'/>\n",c.color&0xffffff));
+            svgStringBuilder.append(spa.getX(n));
+            svgStringBuilder.append(',');
+            svgStringBuilder.append(spa.getY(n));
+            svgStringBuilder.append(String.format("Z' fill='#%06X'/>\n",c.color&0xffffff));
         }
         svgStringBuilder.append("</svg>");
 
