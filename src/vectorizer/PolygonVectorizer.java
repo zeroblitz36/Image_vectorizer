@@ -91,7 +91,7 @@ public class PolygonVectorizer extends BaseVectorizer {
         private long startTime,endTime;
         private long workMatrixResetTime,coverSearchTime,perimeterSearchTime,workMatrixTransferTime,totalTime;
         private long exportSvgTime;
-
+        private LinkedList<ColoredPolygon> localList = new LinkedList<>();
         @Override
         public void run() {
             workMatrixResetTime=0;
@@ -99,7 +99,7 @@ public class PolygonVectorizer extends BaseVectorizer {
             perimeterSearchTime=0;
             workMatrixTransferTime=0;
             totalTime = System.currentTimeMillis();
-            LinkedList<ColoredPolygon> localList = new LinkedList<>();
+
             if(visitMatrix==null || visitMatrix.length < h*w) {
                 visitMatrix = new char[h*w];
             }
@@ -109,8 +109,6 @@ public class PolygonVectorizer extends BaseVectorizer {
 
             Arrays.fill(visitMatrix,0,h*w,(char)0);
             Arrays.fill(workMatrix,0,h*w,(char)0);
-
-            coloredPolygons.clear();
 
             short x0,y0;
             int pixel;
@@ -129,9 +127,7 @@ public class PolygonVectorizer extends BaseVectorizer {
             }
 
             if(canceled)return;
-            if(localList.size()>0) {
-                coloredPolygons.addAll(localList);
-            }
+            coloredPolygons = localList;
 
             if(canceled)return;
             Thread th = new Thread(() -> {
