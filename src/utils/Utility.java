@@ -81,4 +81,13 @@ public class Utility {
         return String.format("%.2f GB",x/1073741824.f);
     }
 
+    public static char red(int color){
+        return (char)((color>>16) & 0xff);
+    }
+    public static char green(int color){
+        return (char)((color>>8) & 0xff);
+    }
+    public static char blue(int color){
+        return (char)(color & 0xff);
+    }
 }

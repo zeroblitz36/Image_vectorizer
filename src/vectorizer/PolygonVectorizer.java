@@ -173,18 +173,17 @@ public class PolygonVectorizer extends BaseVectorizer {
         }
 
         private boolean isThereAnyEmptySpaces(int x0,int y0){
-            return getWorkPixel(x0+1,y0)==0||
-                    getWorkPixel(x0+1,y0+1)==0||
-                    getWorkPixel(x0,y0+1)==0||
-                    getWorkPixel(x0-1,y0+1)==0||
-                    getWorkPixel(x0-1,y0)==0||
-                    getWorkPixel(x0-1,y0-1)==0||
-                    getWorkPixel(x0,y0-1)==0||
-                    getWorkPixel(x0+1,y0-1)==0;
+            return  getWorkPixel(x0-1,  y0-1)   ==0  ||
+                    getWorkPixel(x0,    y0-1)   ==0  ||
+                    getWorkPixel(x0+1,  y0-1)   ==0  ||
+                    getWorkPixel(x0-1,  y0)     ==0  ||
+                    getWorkPixel(x0+1,  y0)     ==0  ||
+                    getWorkPixel(x0-1,  y0+1)   ==0  ||
+                    getWorkPixel(x0,    y0+1)   ==0  ||
+                    getWorkPixel(x0+1,  y0+1)   ==0  ;
         }
         private ColoredPolygon findShape(short x,short y){
             ColoredPolygon coloredPolygon = new ColoredPolygon();
-            Path2D.Float path = new Path2D.Float();
             int startColor = colorOrig(x,y);
             int rTotal=0,gTotal=0,bTotal=0;
             int count=0;
@@ -200,9 +199,10 @@ public class PolygonVectorizer extends BaseVectorizer {
 
             list.clearAll();
             list.push((short) (x0 - 1), y0);
-            list.push((short) (x0+1),y0);
-            list.push(x0, (short) (y0+1));
             list.push(x0, (short) (y0-1));
+            list.push(x0, (short) (y0+1));
+            list.push((short) (x0+1),y0);
+
 
             //Point point;
             rTotal += redOrig(x, y);
@@ -236,9 +236,9 @@ public class PolygonVectorizer extends BaseVectorizer {
                         workMatrix[index]=2;
                     }else {
                         workMatrix[index]=1;
-                        rTotal += redOrig(x0,y0);
-                        gTotal += greenOrig(x0,y0);
-                        bTotal += blueOrig(x0,y0);
+                        rTotal += Utility.red(currentColor);
+                        gTotal += Utility.green(currentColor);
+                        bTotal += Utility.blue(currentColor);
                         count++;
                     }
                     if(isWorkPixelNotVisited(x0,y0+1))
