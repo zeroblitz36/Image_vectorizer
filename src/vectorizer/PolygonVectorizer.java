@@ -228,19 +228,20 @@ public class PolygonVectorizer extends BaseVectorizer {
                 if(maxX<x0)maxX = x0;
                 if(maxY<y0)maxY = y0;
 
-                if(visitMatrix[index]!=0
-                        || Utility.manhattanDistance(startColor, currentColor)>threshold){
+                if(x0==0 || x0==w-1 || y0==0 || y0==h-1 ||
+                        visitMatrix[index]!=0 ||
+                        Utility.manhattanDistance(startColor, currentColor)>threshold)
+                {
                     workMatrix[index]=2;
-                }else{
-                    if(x0==0 || x0==w-1 || y0==0 || y0==h-1) {
-                        workMatrix[index]=2;
-                    }else {
-                        workMatrix[index]=1;
-                        rTotal += Utility.red(currentColor);
-                        gTotal += Utility.green(currentColor);
-                        bTotal += Utility.blue(currentColor);
-                        count++;
-                    }
+                }
+                else
+                {
+                    workMatrix[index]=1;
+                    rTotal += Utility.red(currentColor);
+                    gTotal += Utility.green(currentColor);
+                    bTotal += Utility.blue(currentColor);
+                    count++;
+
                     if(isWorkPixelNotVisited(x0,y0+1))
                         list.push(x0, (short) (y0+1));
                     if(isWorkPixelNotVisited(x0+1,y0))
@@ -257,60 +258,56 @@ public class PolygonVectorizer extends BaseVectorizer {
             rTotal /= count;
             gTotal /= count;
             bTotal /= count;
-            int averageColor = 0xff000000 | (rTotal<<16) | (gTotal<<8) | bTotal;
-
-            int dir,dir2;
-
-
+            coloredPolygon.color = 0xff000000 | (rTotal<<16) | (gTotal<<8) | bTotal;
+            /*
             for(y0=minY;y0<=maxY;y0++)
                 for(x0=minX;x0<=maxX;x0++)
                     if(getWorkPixel(x0,y0)==2)
                     {
-                        x = x0;
-                        y = y0;
-                        x0 = (short) (maxX+1);
-                        y0 = (short) (maxY+1);
-                    }
+                        x = x0; y = y0;
+                        x0 = (short) (maxX+1); y0 = (short) (maxY+1);
+                    }*/
+            y = minY;
+            x = minX;
+            while(getWorkPixel(x,y)!=2)x++;
+
+            if(canceled)return coloredPolygon;
 
             list.push(x,y);
             workMatrix[y * w + x] = 3;
             boolean done = false;
-            dir=0;
+            int dir=0,dir2;
             startTime = System.currentTimeMillis();
-            do {
-                if(canceled)return coloredPolygon;
+            while(!done) {
+                if (canceled) return coloredPolygon;
                 x1 = list.getLastX();
                 y1 = list.getLastY();
-                for(dir2=dir;dir2<8+dir;dir2++){
-                    x0 = (short) (x1 + DIR_X[dir2%8]);
-                    y0 = (short) (y1 + DIR_Y[dir2%8]);
-                    if(x0<0 || x0>=w || y0<0 || y0>=h)continue;
-                    if(y0==y && x0==x) {
+                for (dir2 = dir; dir2 < 8 + dir; dir2++) {
+                    x0 = (short) (x1 + DIR_X[dir2 % 8]);
+                    y0 = (short) (y1 + DIR_Y[dir2 % 8]);
+                    if (x0 < 0 || x0 >= w || y0 < 0 || y0 >= h) continue;
+                    if (y0 == y && x0 == x) {
                         done = true;
                         break;
-                    }else if(workMatrix[y0*w+x0]==2){
-                        if(isThereAnyEmptySpaces(x0,y0))
-                        {
+                    } else if (workMatrix[y0 * w + x0] == 2) {
+                        if (isThereAnyEmptySpaces(x0, y0)) {
                             workMatrix[y0 * w + x0] = 3;
-                            int i = list.size()-2;
-                            int j = list.size()-1;
-                            if(i>=0 && x0-list.getX(j) == list.getX(i)-list.getX(j) && y0-list.getY(j) == list.getY(i)-list.getY(j)) {
-                                list.setXY(j,x0,y0);
-                            }else {
+                            int i = list.size() - 2;
+                            int j = list.size() - 1;
+                            if (i >= 0 && x0 - list.getX(j) == list.getX(i) - list.getX(j) && y0 - list.getY(j) == list.getY(i) - list.getY(j)) {
+                                list.setXY(j, x0, y0);
+                            } else {
                                 list.push(x0, y0);
                             }
                             dir = (dir2 + 5) % 8;
                             //dir2 = dir;
                             break;
-                        }
-                        else
-                        {
+                        } else {
                             workMatrix[y0 * w + x0] = 1;
                         }
                     }
                 }
-                if(done)break;
-            }while(!done);
+            }
 
             float comp = 0.1f;
             boolean flag = true;
@@ -361,9 +358,6 @@ public class PolygonVectorizer extends BaseVectorizer {
                 }
             endTime = System.currentTimeMillis();
             workMatrixTransferTime += endTime-startTime;
-
-            coloredPolygon.color = averageColor;
-
 
             return coloredPolygon;
         }
