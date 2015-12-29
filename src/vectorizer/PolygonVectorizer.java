@@ -148,7 +148,7 @@ public class PolygonVectorizer extends BaseVectorizer {
             }
             setIsDone(true);
             totalTime = System.currentTimeMillis() - totalTime;
-            System.out.format("workMatrixResetTime = %d\n" +
+            /*System.out.format("workMatrixResetTime = %d\n" +
                             "coverSearchTime = %d\n" +
                             "perimeterSearchTime = %d\n" +
                             "workMatrixTransferTime = %d\n" +
@@ -160,7 +160,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                     perimeterSearchTime,
                     workMatrixTransferTime,
                     exportSvgTime,
-                    totalTime);
+                    totalTime);*/
         }
 
         private char getWorkPixel(int x,int y){
@@ -255,18 +255,6 @@ public class PolygonVectorizer extends BaseVectorizer {
             endTime = System.currentTimeMillis();
             coverSearchTime += endTime-startTime;
 
-            rTotal /= count;
-            gTotal /= count;
-            bTotal /= count;
-            coloredPolygon.color = 0xff000000 | (rTotal<<16) | (gTotal<<8) | bTotal;
-            /*
-            for(y0=minY;y0<=maxY;y0++)
-                for(x0=minX;x0<=maxX;x0++)
-                    if(getWorkPixel(x0,y0)==2)
-                    {
-                        x = x0; y = y0;
-                        x0 = (short) (maxX+1); y0 = (short) (maxY+1);
-                    }*/
             y = minY;
             x = minX;
             while(getWorkPixel(x,y)!=2)x++;
@@ -297,10 +285,18 @@ public class PolygonVectorizer extends BaseVectorizer {
                             break;
                         } else {
                             workMatrix[y0 * w + x0] = 1;
+                            rTotal += redOrig(x0, y0);
+                            gTotal += greenOrig(x0, y0);
+                            bTotal += blueOrig(x0, y0);
+                            count++;
                         }
                     }
                 }
             }
+            rTotal/=count;
+            gTotal/=count;
+            bTotal/=count;
+            coloredPolygon.color = 0xff000000 | (rTotal<<16) | (gTotal<<8) | bTotal;
 
             float comp = 0.1f;
             boolean flag = true;
