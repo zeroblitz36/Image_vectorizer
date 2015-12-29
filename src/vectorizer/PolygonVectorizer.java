@@ -292,15 +292,8 @@ public class PolygonVectorizer extends BaseVectorizer {
                     } else if (workMatrix[y0 * w + x0] == 2) {
                         if (isThereAnyEmptySpaces(x0, y0)) {
                             workMatrix[y0 * w + x0] = 3;
-                            int i = list.size() - 2;
-                            int j = list.size() - 1;
-                            if (i >= 0 && x0 - list.getX(j) == list.getX(i) - list.getX(j) && y0 - list.getY(j) == list.getY(i) - list.getY(j)) {
-                                list.setXY(j, x0, y0);
-                            } else {
-                                list.push(x0, y0);
-                            }
+                            list.push(x0, y0);
                             dir = (dir2 + 5) % 8;
-                            //dir2 = dir;
                             break;
                         } else {
                             workMatrix[y0 * w + x0] = 1;
