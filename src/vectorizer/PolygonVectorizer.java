@@ -306,7 +306,7 @@ public class PolygonVectorizer extends BaseVectorizer {
             while(flag) {
                 flag = false;
                 workList.clearAll();
-                workList.push(list.getX(0),list.getY(1));
+                workList.push(list.getX(0),list.getY(0));
                 for (int i = 0; i < list.size() - 2; i++) {
                     short xa = list.getX(i);
                     short ya = list.getY(i);
@@ -326,6 +326,7 @@ public class PolygonVectorizer extends BaseVectorizer {
                 }
                 workList.push(list.getLastX(),list.getLastY());
                 if(flag){
+                    System.out.format("Change detected %d => %d\n",list.size(),workList.size());
                     list.copyFrom(workList);
                 }
             }
