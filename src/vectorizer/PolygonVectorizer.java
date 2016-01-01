@@ -326,7 +326,6 @@ public class PolygonVectorizer extends BaseVectorizer {
                 }
                 workList.push(list.getLastX(),list.getLastY());
                 if(flag){
-                    System.out.format("Change detected %d => %d\n",list.size(),workList.size());
                     list.copyFrom(workList);
                 }
             }
