@@ -7,8 +7,8 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
-public class SquareVectorizer extends BaseVectorizer{
-    private ArrayList<SquareFragment> lastSavedSquareList;
+public class RectangleVectorizer extends BaseVectorizer{
+    private ArrayList<RectangleFragment> lastSavedSquareList;
     private Random random = new Random(System.currentTimeMillis());
     long startTime, endTime;
 
@@ -43,10 +43,10 @@ public class SquareVectorizer extends BaseVectorizer{
         }
     }
 
-    public void drawFunction(ArrayList<SquareFragment> list){
+    public void drawFunction(ArrayList<RectangleFragment> list){
         if(destImage!=null || isInBenchmark) {
             Graphics2D g = destImage.createGraphics();
-            for (SquareFragment s : list) {
+            for (RectangleFragment s : list) {
                 g.setColor(new Color(s.color));
                 g.fillRect(s.l, s.t, s.r - s.l + 1, s.d - s.t + 1);
             }
@@ -57,21 +57,21 @@ public class SquareVectorizer extends BaseVectorizer{
     }
 
     private class Job extends JobThread{
-        private ArrayList<SquareFragment> fragList = new ArrayList<>();
+        private ArrayList<RectangleFragment> fragList = new ArrayList<>();
         @Override
         public void run() {
             if (originalImage == null || canceled) return;
-            SquareFragment squareFragment = new SquareFragment((short)0,(short) (w - 1),(short) 0, (short)(h - 1), -1);
+            RectangleFragment rectangleFragment = new RectangleFragment((short)0,(short) (w - 1),(short) 0, (short)(h - 1), -1);
             startTime = System.currentTimeMillis();
-            SquareFragment s1 = new SquareFragment();
-            SquareFragment s2 = new SquareFragment();
-            SquareFragment s3 = new SquareFragment();
-            SquareFragment s4 = new SquareFragment();
-            splitSquareFragmentInFour(squareFragment,s1,s2,s3,s4);
-            LinkedList<SquareFragment> fragList1 = new LinkedList<>();
-            LinkedList<SquareFragment> fragList2 = new LinkedList<>();
-            LinkedList<SquareFragment> fragList3 = new LinkedList<>();
-            LinkedList<SquareFragment> fragList4 = new LinkedList<>();
+            RectangleFragment s1 = new RectangleFragment();
+            RectangleFragment s2 = new RectangleFragment();
+            RectangleFragment s3 = new RectangleFragment();
+            RectangleFragment s4 = new RectangleFragment();
+            splitRectangleFragmentInFour(rectangleFragment,s1,s2,s3,s4);
+            LinkedList<RectangleFragment> fragList1 = new LinkedList<>();
+            LinkedList<RectangleFragment> fragList2 = new LinkedList<>();
+            LinkedList<RectangleFragment> fragList3 = new LinkedList<>();
+            LinkedList<RectangleFragment> fragList4 = new LinkedList<>();
             Thread t1 = new Thread(() -> {
                 if (s1.isValid()) recFragCheck(s1,fragList1);
             });
@@ -121,7 +121,7 @@ public class SquareVectorizer extends BaseVectorizer{
             setIsDone(true);
         }
 
-        private void recFragCheck(SquareFragment s,Collection<SquareFragment> localFragList) {
+        private void recFragCheck(RectangleFragment s, Collection<RectangleFragment> localFragList) {
             int rTotal, gTotal, bTotal, avgColor;
             rTotal=(redOrig(s.l,s.t)+redOrig(s.r,s.t)+redOrig(s.l,s.d)+redOrig(s.r,s.d))/4;
             gTotal=(greenOrig(s.l, s.t)+greenOrig(s.r, s.t)+greenOrig(s.l, s.d)+greenOrig(s.r, s.d))/4;
@@ -146,11 +146,11 @@ public class SquareVectorizer extends BaseVectorizer{
                 int x = aproxCompletedPixelCount.addAndGet(s.area());
                 updateDetails(String.format("Progress : %.1f%%", 100.f * x / area));
             } else {
-                SquareFragment s1 = new SquareFragment();
-                SquareFragment s2 = new SquareFragment();
-                SquareFragment s3 = new SquareFragment();
-                SquareFragment s4 = new SquareFragment();
-                splitSquareFragmentInFour(s,s1,s2,s3,s4);
+                RectangleFragment s1 = new RectangleFragment();
+                RectangleFragment s2 = new RectangleFragment();
+                RectangleFragment s3 = new RectangleFragment();
+                RectangleFragment s4 = new RectangleFragment();
+                splitRectangleFragmentInFour(s,s1,s2,s3,s4);
 
                 if (s1.isValid()) recFragCheck(s1,localFragList);
                 if (s2.isValid()) recFragCheck(s2,localFragList);
@@ -159,7 +159,7 @@ public class SquareVectorizer extends BaseVectorizer{
             }
         }
 
-        private void splitSquareFragmentInFour(SquareFragment s,SquareFragment s1,SquareFragment s2,SquareFragment s3,SquareFragment s4){
+        private void splitRectangleFragmentInFour(RectangleFragment s, RectangleFragment s1, RectangleFragment s2, RectangleFragment s3, RectangleFragment s4){
             short midX = (short) (s.l + (random.nextFloat() / 2 + 0.25f) * (s.r - s.l));
             short midY = (short) (s.t + (random.nextFloat() / 2 + 0.25f) * (s.d - s.t));
 
@@ -174,7 +174,7 @@ public class SquareVectorizer extends BaseVectorizer{
     protected void constructStringSVG() {
         svgStringBuilder.setLength(0);
         svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>\n", w, h));
-        for(SquareFragment sf : lastSavedSquareList) {
+        for(RectangleFragment sf : lastSavedSquareList) {
             svgStringBuilder.append(String.format("<rect x='%d' y='%d' width='%d' height='%d' style='fill:#%06X'/>\n",
                     sf.l,
                     sf.t,

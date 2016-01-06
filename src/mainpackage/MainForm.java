@@ -5,10 +5,6 @@ import vectorizer.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -39,7 +35,7 @@ public class MainForm {
     private Random random = new Random(System.currentTimeMillis());
     public MainForm() {
         indexHashMap.put("Original",null);
-        indexHashMap.put("Square",new SquareVectorizer());
+        indexHashMap.put("Rectangle",new RectangleVectorizer());
         indexHashMap.put("Triangle",new TriangleVectorizer());
         indexHashMap.put("Polygon", new PolygonVectorizer());
 
