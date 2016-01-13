@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
 public class RectangleVectorizer extends BaseVectorizer{
-    private ArrayList<RectangleFragment> lastSavedSquareList;
+    private ArrayList<RectangleFragment> lastRectangleSquareList;
     private Random random = new Random(System.currentTimeMillis());
     long startTime, endTime;
 
@@ -103,7 +103,7 @@ public class RectangleVectorizer extends BaseVectorizer{
 
             if(canceled) return;
             endTime = System.currentTimeMillis();
-            lastSavedSquareList = fragList;
+            lastRectangleSquareList = fragList;
             if (canceled) return;
             Thread th = new Thread(() -> {
                 constructStringSVG();
@@ -112,7 +112,7 @@ public class RectangleVectorizer extends BaseVectorizer{
                         Utility.aproximateDataSize(svgzStringBuilder.length())));
             });
             th.start();
-            drawFunction(lastSavedSquareList);
+            drawFunction(lastRectangleSquareList);
             try {
                 th.join();
             } catch (InterruptedException e) {
@@ -174,7 +174,7 @@ public class RectangleVectorizer extends BaseVectorizer{
     protected void constructStringSVG() {
         svgStringBuilder.setLength(0);
         svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>\n", w, h));
-        for(RectangleFragment sf : lastSavedSquareList) {
+        for(RectangleFragment sf : lastRectangleSquareList) {
             svgStringBuilder.append(String.format("<rect x='%d' y='%d' width='%d' height='%d' style='fill:#%06X'/>\n",
                     sf.l,
                     sf.t,
