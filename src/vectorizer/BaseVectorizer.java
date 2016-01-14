@@ -6,6 +6,9 @@ import utils.Utility;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
@@ -31,6 +34,8 @@ public abstract class BaseVectorizer {
     protected AtomicInteger aproxCompletedPixelCount = new AtomicInteger();
     private boolean isDone = false;
     public boolean isInBenchmark=false;
+    protected static final DecimalFormat singleDecimalFormat = new DecimalFormat("#.#", DecimalFormatSymbols.getInstance(Locale.US));
+
 
     public abstract void startJob();
     public abstract void cancelLastJob();

@@ -5,10 +5,8 @@ import utils.Utility;
 import java.awt.*;
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Random;
+import java.text.DecimalFormatSymbols;
+import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
 public class TriangleVectorizer extends BaseVectorizer{
@@ -231,21 +229,20 @@ public class TriangleVectorizer extends BaseVectorizer{
         long time;
         time = System.currentTimeMillis();
         svgStringBuilder.setLength(0);
-        svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>\n", w, h));
-        DecimalFormat decimalFormat = new DecimalFormat("#.#");
-        svgStringBuilder.append("<g stroke-width='0.5'>\n");
+        svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>", w, h));
+        svgStringBuilder.append("<g stroke-width='0.5'>");
         for(Triangle t:lastSavedTriangleList){
-            svgStringBuilder.append(String.format("<path d='M%s,%sL%s,%sL%s,%sZ' fill='#%06X' stroke='#%06X'/>\n",
-                    decimalFormat.format(t.x0),
-                    decimalFormat.format(t.y0),
-                    decimalFormat.format(t.x1),
-                    decimalFormat.format(t.y1),
-                    decimalFormat.format(t.x2),
-                    decimalFormat.format(t.y2),
+            svgStringBuilder.append(String.format("<path d='M%s,%sL%s,%sL%s,%sZ' fill='#%06X' stroke='#%06X'/>",
+                    singleDecimalFormat.format(t.x0),
+                    singleDecimalFormat.format(t.y0),
+                    singleDecimalFormat.format(t.x1),
+                    singleDecimalFormat.format(t.y1),
+                    singleDecimalFormat.format(t.x2),
+                    singleDecimalFormat.format(t.y2),
                     t.color&0xffffff,
                     t.color&0xffffff));
         }
-        svgStringBuilder.append("</g>\n");
+        svgStringBuilder.append("</g>");
         svgStringBuilder.append("</svg>");
         System.out.printf("SVG time = %.3fs\n",(System.currentTimeMillis()-time)/1000.f);
 
