@@ -3,12 +3,10 @@ package vectorizer;
 import utils.Utility;
 
 import java.awt.*;
-import java.io.*;
 import java.util.*;
-import java.util.zip.GZIPOutputStream;
 
 public class RectangleVectorizer extends BaseVectorizer{
-    private ArrayList<RectangleFragment> lastRectangleSquareList;
+    private ArrayList<RectangleFragment> lastRectangleList;
     private Random random = new Random(System.currentTimeMillis());
     long startTime, endTime;
 
@@ -85,7 +83,6 @@ public class RectangleVectorizer extends BaseVectorizer{
             t2.start();
             t3.start();
             if (s4.isValid()) recFragCheck(s4,fragList4);
-            if(canceled) return;
             try {
                 t1.join();
                 t2.join();
@@ -103,8 +100,7 @@ public class RectangleVectorizer extends BaseVectorizer{
 
             if(canceled) return;
             endTime = System.currentTimeMillis();
-            lastRectangleSquareList = fragList;
-            if (canceled) return;
+            lastRectangleList = fragList;
             Thread th = new Thread(() -> {
                 constructStringSVG();
                 updateDetails(String.format("SVG:%s SVGZ:%s",
@@ -112,7 +108,7 @@ public class RectangleVectorizer extends BaseVectorizer{
                         Utility.aproximateDataSize(svgzStringBuilder.length())));
             });
             th.start();
-            drawFunction(lastRectangleSquareList);
+            drawFunction(lastRectangleList);
             try {
                 th.join();
             } catch (InterruptedException e) {
@@ -174,7 +170,7 @@ public class RectangleVectorizer extends BaseVectorizer{
     protected void constructStringSVG() {
         svgStringBuilder.setLength(0);
         svgStringBuilder.append(String.format("<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='%d' height='%d'>\n", w, h));
-        for(RectangleFragment sf : lastRectangleSquareList) {
+        for(RectangleFragment sf : lastRectangleList) {
             svgStringBuilder.append(String.format("<rect x='%d' y='%d' width='%d' height='%d' style='fill:#%06X'/>\n",
                     sf.l,
                     sf.t,
