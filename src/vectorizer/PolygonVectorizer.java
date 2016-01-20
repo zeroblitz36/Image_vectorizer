@@ -374,16 +374,6 @@ public class PolygonVectorizer extends BaseVectorizer {
         }
         svgStringBuilder.append("</svg>");
 
-        try {
-            if(gzos==null)
-                gzos = new GZIPOutputStream(baos,true);
-            baos.reset();
-            gzos.write(svgStringBuilder.toString().getBytes());
-            gzos.flush();
-            svgzStringBuilder.setLength(0);
-            svgzStringBuilder.append(baos.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        constructStringSVGZ();
     }
 }

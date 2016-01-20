@@ -246,22 +246,6 @@ public class TriangleVectorizer extends BaseVectorizer{
         svgStringBuilder.append("</svg>");
         System.out.printf("SVG time = %.3fs\n",(System.currentTimeMillis()-time)/1000.f);
 
-        try {
-            if(gzos==null)
-                gzos = new GZIPOutputStream(baos,true);
-            baos.reset();
-            time = System.currentTimeMillis();
-            gzos.write(svgStringBuilder.toString().getBytes());
-            System.out.printf("SVGZ gzos write time = %.3fs\n", (System.currentTimeMillis() - time) / 1000.f);
-            time = System.currentTimeMillis();
-            gzos.flush();
-            System.out.printf("SVG gzos flush = %.3fs\n", (System.currentTimeMillis() - time) / 1000.f);
-            svgzStringBuilder.setLength(0);
-            time = System.currentTimeMillis();
-            svgzStringBuilder.append(baos.toString());
-            System.out.printf("SVG final write = %.3fs\n", (System.currentTimeMillis() - time) / 1000.f);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        constructStringSVGZ();
     }
 }
