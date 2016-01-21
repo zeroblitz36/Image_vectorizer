@@ -129,7 +129,6 @@ public class PolygonVectorizer extends BaseVectorizer {
             if(canceled)return;
             coloredPolygons = localList;
 
-            if(canceled)return;
             Thread th = new Thread(() -> {
                 exportSvgTime = System.currentTimeMillis();
                 constructStringSVG();
