@@ -2,6 +2,8 @@ package vectorizer;
 
 import utils.Utility;
 
+import java.util.Locale;
+
 /**
  * Created by Zero on 27.10.2015.
  */
@@ -14,6 +16,7 @@ public class BenchmarkTool {
         int svgSize,svgzSize;
         float perc;
         float time;
+        Locale.setDefault(Locale.US);
         String results = "Threshold,Time,SvgSize,SvgzSize,Percentage\n";
         long start,end;
         originalColors = new int[vectorizer.area];
